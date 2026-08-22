@@ -9,10 +9,13 @@
     "viz": "node --import tsx src/build_viz.ts",
     "test": "node --import tsx tests/basic.test.ts",
     "demo:github": "npm run generate -- catalogs/github.json --out dependency_graph.github.json && npm run viz -- dependency_graph.github.json visualization.github.html",
-    "demo:slack": "npm run generate -- catalogs/slack.json --out dependency_graph.slack.json && npm run viz -- dependency_graph.slack.json visualization.slack.html"
+    "demo:slack": "npm run generate -- catalogs/slack.json --out dependency_graph.slack.json && npm run viz -- dependency_graph.slack.json visualization.slack.html",
+    "metrics": "node --import tsx src/metrics.ts",
+    "build:web": "node web/build.mjs"
   },
   "dependencies": {},
   "devDependencies": {
+    "esbuild": "^0.28.2",
     "tsx": "^4.19.0"
   }
 }

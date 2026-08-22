@@ -6,7 +6,13 @@
  *
  * Usage: node --import tsx src/metrics.ts catalogs/github.json
  */
-import { loadCatalog, generate, requiredInputNames, slugOf } from "./generate.ts";
+import { readFileSync } from "fs";
+import { generate, requiredInputNames, slugOf, type Tool } from "./core.ts";
+
+function loadCatalog(path: string): Tool[] {
+  const data = JSON.parse(readFileSync(path, "utf-8"));
+  return Array.isArray(data) ? data : (data.tools ?? data.items ?? []);
+}
 
 const catalogPath = process.argv[2];
 if (!catalogPath) throw new Error("usage: metrics.ts <catalog.json>");
