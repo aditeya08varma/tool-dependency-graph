@@ -46,13 +46,34 @@ Matching is purely lexical and structural; it has no semantic understanding of w
 
 The underlying cause: RPC-style catalogs conventionally name a tool's own top-level response wrapper `<VerbNoun>Response`, which leaks the tool's own action name into context the same way a genuinely reused entity type (`Issue`, `PullRequest`, `User`) would — but a wrapper referenced from exactly one place isn't the same kind of signal as a type reused across many tools. A cleaner fix (weight context by how many places a type is `$ref`'d from) was considered and rejected here: at small catalog scale it broke a different, correct match (`Invitation`, which only happens to appear once in this demo catalog). Fixing this properly needs either a larger catalog to make the reuse-count signal reliable, or a small second pass that specifically discounts a tool's own top-level wrapper type. Left as an open, documented gap rather than patched with something fragile.
 
+## How the matching logic actually performs
+
+`npm run metrics -- catalogs/<name>.json` classifies every required input in a catalog into one of three buckets, instead of just reporting a raw edge count:
+
+| Catalog | Suppressed as ambient | Matched to a producer | Unmatched residual |
+|---|---|---|---|
+| GitHub | 71.4% | 19.0% | 9.5% (4 inputs) |
+| Slack | 45.0% | 5.0% | 50.0% (10 inputs) |
+
+The unmatched residual isn't automatically "wrong" — most of it is genuinely user-supplied content with no producer to find (an issue's `title`, a message's `text`, an email address). But breaking down Slack's residual specifically surfaces a real, precise gap: `SLACK_POST_MESSAGE` produces a message `ts`, but `SLACK_UPDATE_MESSAGE`/`SLACK_DELETE_MESSAGE` (`ts`) and `SLACK_ADD_REACTION`/`SLACK_PIN_MESSAGE` (`timestamp`) never connect to it, because neither `ts` nor `timestamp` is shaped like the identifiers this matcher trusts (`_id`/`_number`/`_sha`/etc.). That's exactly the kind of case an LLM fallback pass would close — now backed by a number instead of a guess.
+
+## Try it in the browser
+
+`web/index.html` is a self-contained, client-side app — paste or upload a catalog, click generate, get the graph. Nothing is sent anywhere; the same matching code from `src/core.ts` runs directly in your browser via a bundled script.
+
+```bash
+npm run build:web   # regenerates web/core.bundle.js and web/index.html
+open web/index.html # or just double-click it
+```
+
 ## Running it
 
 ```bash
 npm install
 npm run generate -- catalogs/github.json --out dependency_graph.json
 npm run viz -- dependency_graph.json visualization.html
+npm run metrics -- catalogs/github.json
 npm test
 ```
 
-`generate.ts` takes any catalog in the same shape (array of tools, each with `slug`, `inputParameters.required`, `outputParameters.properties.data` resolving through `$defs`) — it isn't specific to either catalog committed here.
+`generate.ts` (and the pure logic in `core.ts` it wraps) takes any catalog in the same shape (array of tools, each with `slug`, `inputParameters.required`, `outputParameters.properties.data` resolving through `$defs`) — it isn't specific to either catalog committed here.
