@@ -32,6 +32,10 @@ export interface Graph {
 export type Confidence = "high" | "low";
 export interface DetailedEdge extends Edge {
   confidence: Confidence;
+  /** the producer's actual enclosing type name, e.g. "ReleaseAsset" -- lets a
+   * reviewer (human or LLM) see that a field came from a nested sub-object,
+   * not the tool's own top-level entity. */
+  producerType: string;
 }
 export interface UnmatchedInput {
   tool: string;
@@ -78,6 +82,10 @@ interface FieldRef {
   /** tokens of the nearest enclosing $defs name, e.g. ["pull","request"] for "PullRequest" */
   contextTokens: string[];
   fieldName: string;
+  /** the raw enclosing type name (e.g. "ReleaseAsset"), for surfacing to an
+   * LLM reviewer so it can tell "this tool's own id" apart from "a field on
+   * a nested sub-object" -- contextTokens alone can't distinguish those. */
+  defName: string;
 }
 
 function splitWords(name: string): string[] {
@@ -92,6 +100,7 @@ function collectFields(
   node: any,
   defs: Record<string, any>,
   contextTokens: string[],
+  defName: string,
   collected: FieldRef[],
   visited: Set<string>,
   depth: number,
@@ -99,23 +108,23 @@ function collectFields(
   if (!node || depth > 5) return;
 
   if (node.$ref) {
-    const defName = String(node.$ref).split("/").pop()!;
-    if (visited.has(defName)) return;
-    const resolved = defs[defName];
+    const refName = String(node.$ref).split("/").pop()!;
+    if (visited.has(refName)) return;
+    const resolved = defs[refName];
     if (!resolved) return;
-    collectFields(resolved, defs, splitWords(defName), collected, new Set(visited).add(defName), depth);
+    collectFields(resolved, defs, splitWords(refName), refName, collected, new Set(visited).add(refName), depth);
     return;
   }
 
   if (node.type === "array" && node.items) {
-    collectFields(node.items, defs, contextTokens, collected, visited, depth);
+    collectFields(node.items, defs, contextTokens, defName, collected, visited, depth);
     return;
   }
 
   if (node.properties) {
     for (const [fieldName, fieldSchema] of Object.entries<any>(node.properties)) {
-      collected.push({ contextTokens, fieldName });
-      collectFields(fieldSchema, defs, contextTokens, collected, visited, depth + 1);
+      collected.push({ contextTokens, fieldName, defName });
+      collectFields(fieldSchema, defs, contextTokens, defName, collected, visited, depth + 1);
     }
   }
 }
@@ -127,7 +136,7 @@ function outputFields(tool: Tool): FieldRef[] {
   const dataSchema = op.properties?.data;
   if (!dataSchema) return [];
   const collected: FieldRef[] = [];
-  collectFields(dataSchema, defs, [], collected, new Set(), 0);
+  collectFields(dataSchema, defs, [], "(root)", collected, new Set(), 0);
   return collected;
 }
 
@@ -258,7 +267,7 @@ export function generateDetailed(tools: Tool[]): DetailedGraph {
         const edgeKey = `${p.slug}->${consumerSlug}->${inputName}`;
         if (seen.has(edgeKey)) continue;
         seen.add(edgeKey);
-        edges.push({ from: p.slug, to: consumerSlug, label: inputName, confidence });
+        edges.push({ from: p.slug, to: consumerSlug, label: inputName, confidence, producerType: p.defName });
       }
     }
   }

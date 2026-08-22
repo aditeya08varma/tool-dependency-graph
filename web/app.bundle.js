@@ -33706,24 +33706,24 @@ input.vis-configuration.vis-config-range:focus::-ms-fill-upper {
     const words = name.match(/[A-Z][a-z0-9]*|[a-z0-9]+/g) ?? [name];
     return words.map((w) => w.toLowerCase());
   }
-  function collectFields(node, defs, contextTokens, collected, visited, depth) {
+  function collectFields(node, defs, contextTokens, defName, collected, visited, depth) {
     if (!node || depth > 5) return;
     if (node.$ref) {
-      const defName = String(node.$ref).split("/").pop();
-      if (visited.has(defName)) return;
-      const resolved = defs[defName];
+      const refName = String(node.$ref).split("/").pop();
+      if (visited.has(refName)) return;
+      const resolved = defs[refName];
       if (!resolved) return;
-      collectFields(resolved, defs, splitWords(defName), collected, new Set(visited).add(defName), depth);
+      collectFields(resolved, defs, splitWords(refName), refName, collected, new Set(visited).add(refName), depth);
       return;
     }
     if (node.type === "array" && node.items) {
-      collectFields(node.items, defs, contextTokens, collected, visited, depth);
+      collectFields(node.items, defs, contextTokens, defName, collected, visited, depth);
       return;
     }
     if (node.properties) {
       for (const [fieldName, fieldSchema] of Object.entries(node.properties)) {
-        collected.push({ contextTokens, fieldName });
-        collectFields(fieldSchema, defs, contextTokens, collected, visited, depth + 1);
+        collected.push({ contextTokens, fieldName, defName });
+        collectFields(fieldSchema, defs, contextTokens, defName, collected, visited, depth + 1);
       }
     }
   }
@@ -33734,7 +33734,7 @@ input.vis-configuration.vis-config-range:focus::-ms-fill-upper {
     const dataSchema = op.properties?.data;
     if (!dataSchema) return [];
     const collected = [];
-    collectFields(dataSchema, defs, [], collected, /* @__PURE__ */ new Set(), 0);
+    collectFields(dataSchema, defs, [], "(root)", collected, /* @__PURE__ */ new Set(), 0);
     return collected;
   }
   var IDENTIFIER_SHAPE = /(^|_)(id|number|sha|slug|ref|key|token)$/i;
@@ -33816,7 +33816,7 @@ input.vis-configuration.vis-config-range:focus::-ms-fill-upper {
           const edgeKey = `${p.slug}->${consumerSlug}->${inputName}`;
           if (seen.has(edgeKey)) continue;
           seen.add(edgeKey);
-          edges.push({ from: p.slug, to: consumerSlug, label: inputName, confidence });
+          edges.push({ from: p.slug, to: consumerSlug, label: inputName, confidence, producerType: p.defName });
         }
       }
     }

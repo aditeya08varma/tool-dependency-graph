@@ -84,21 +84,19 @@ npm run refine -- catalogs/github_extended.json --out dependency_graph.json
 
 Without an API key present, this is a verified no-op: diffed its output against the plain deterministic CLI and confirmed byte-identical edge sets — the tool works standalone, the LLM step is a pure opt-in addition, never a requirement.
 
-**With a live key (tested against Gemini via its OpenAI-compatibility endpoint), on the 42-tool catalog:**
+**With a live key (tested against Gemini via its OpenAI-compatibility endpoint), on the 42-tool catalog, across two iterations:**
 
-| | Deterministic only | + LLM refinement |
-|---|---|---|
-| Edges | 97 | 65 |
-| Precision | 0.567 | **0.846** |
-| Recall | 0.902 | 0.902 |
-| F1 | 0.696 | **0.873** |
+| | Deterministic only | LLM v1 | LLM v2 |
+|---|---|---|---|
+| Precision | 0.567 | 0.846 | 0.762 |
+| Recall | 0.902 | 0.902 | **1.000** |
+| F1 | 0.696 | 0.873 | 0.865 |
 
-The LLM filtered 32 of 42 false positives to 10, without losing a single one of the 55 true positives — recall is unchanged, precision nearly doubled. The reasoning is specific and correct, not just a plausible-sounding rejection — e.g. it rejected `LIST_CHECK_RUNS_FOR_A_REF → GET_A_WORKFLOW_RUN [run_id]` with *"Check run IDs belong to the Check Runs API and are distinct from GitHub Actions workflow run IDs"*, which is exactly the semantic distinction lexical matching cannot make. It also correctly solved the specific synonym gap this step was built for: `LIST_TEAM_MEMBERS_IN_ORG → ADD_OR_UPDATE_TEAM_MEMBERSHIP [username]`, recognizing that a `User.login` field satisfies a `username` parameter despite sharing no tokens.
+**v1** validated low-confidence edges using only tool descriptions. It correctly rejected `LIST_CHECK_RUNS_FOR_A_REF → GET_A_WORKFLOW_RUN [run_id]` with *"Check run IDs belong to the Check Runs API and are distinct from GitHub Actions workflow run IDs"* — exactly the semantic distinction lexical matching can't make — and correctly solved the synonym case this step was built for (`User.login` satisfying a `username` param, despite sharing no tokens). But it also missed real relationships: it rejected `GET_A_RELEASE → GET_A_RELEASE_ASSET [asset_id]`, almost certainly over-applying its own correct "a release's ID isn't an asset's ID" reasoning without realizing this specific field comes from a *nested* asset array, not the release's own ID — the prompt only passed tool descriptions, not the actual resolved field structure.
 
-Not a clean sweep, and worth naming precisely rather than rounding up to "it works":
-- **One new false positive**: `LIST_RELEASES → CREATE_A_RELEASE [tag_name]` — `tag_name` is caller-authored (like a title), not a fetched value; the model overreached here.
-- **Partial credit on the webhook gap**: found 3 of 5 expected `hook_id` edges, missing the ones where `GET_A_REPOSITORY_WEBHOOK` should *also* count as a producer — a limitation of the prompt only asking for one producer per gap, not a model failure.
-- **A subtler miss**: `GET_A_RELEASE`/`LIST_RELEASES` should also supply `asset_id` (a release nests an array of assets), but got rejected — very likely the model over-applying its own correct "release_id ≠ asset_id" reasoning without visibility into the nested array, since the validation prompt only passes tool descriptions, not resolved field paths. A real, fixable gap in the prompt's context, not evidence the approach doesn't work.
+**v2** fixed that by passing the producer's *actual* enclosing type name per field (`producerType`, e.g. `"ReleaseAsset"`) instead of just the tool's description, and by asking the fill-gap step for *all* plausible producers instead of just one. Result: **recall reached a perfect 1.0** — every real relationship, including the nested-asset case and all 5 `hook_id` relationships, is now found. The cost: precision dropped from 0.846 to 0.762, and it's worth being honest about why rather than calling it a regression. Most of the new false positives are the model reasoning *correctly* that `sha`/`head_branch`/`tag_name` fields are all technically valid git refs for `LIST_CHECK_RUNS_FOR_A_REF`'s `ref` parameter — which is factually true, just broader than this hand-built ground truth assumed, since no single tool here was designed as *the* canonical ref producer. One genuine remaining mistake, not just a scope disagreement: `tag_name` is still wrongly treated as fetchable, when it's caller-chosen, like a title.
+
+Neither version is strictly "better" — v1 is more conservative (higher precision, might miss real edges), v2 is more thorough (perfect recall, a few over-inclusive suggestions a reviewer would need to glance at and dismiss). Given this project's whole thesis is knowing exactly what you're missing, v2's trade-off is the one I'd keep — but it's a genuine judgment call about false positives vs. false negatives, not a strictly dominant improvement.
 
 ## How the matching logic actually performs
 
