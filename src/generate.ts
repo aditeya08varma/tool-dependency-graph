@@ -31,12 +31,12 @@ function parseArgs() {
   return { catalogPath, outPath };
 }
 
-function loadCatalog(path: string): Tool[] {
+export function loadCatalog(path: string): Tool[] {
   const data = JSON.parse(readFileSync(path, "utf-8"));
   return Array.isArray(data) ? data : (data.tools ?? data.items ?? []);
 }
 
-function slugOf(tool: Tool): string | undefined {
+export function slugOf(tool: Tool): string | undefined {
   return tool.slug ?? tool.name ?? tool.function?.name;
 }
 
@@ -51,7 +51,7 @@ function serviceOf(tool: Tool): string | undefined {
   return tag ? tag.toLowerCase() : undefined;
 }
 
-function requiredInputNames(tool: Tool): string[] {
+export function requiredInputNames(tool: Tool): string[] {
   const req: string[] = tool.inputParameters?.required ?? [];
   return req.map(String);
 }
@@ -159,7 +159,7 @@ function buildIndex(tools: Tool[]): Map<string, ProducerField[]> {
   return index;
 }
 
-function generate(tools: Tool[]): Graph {
+export function generate(tools: Tool[]): Graph {
   const nodes: Node[] = tools
     .map((t) => ({ id: slugOf(t), service: serviceOf(t) }))
     .filter((n): n is Node => !!n.id);
@@ -242,4 +242,6 @@ function main() {
   }, null, 2));
 }
 
-main();
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}
