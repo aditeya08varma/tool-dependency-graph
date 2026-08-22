@@ -1,0 +1,600 @@
+[
+  {
+    "slug": "GITHUB_LIST_REPOSITORY_ISSUES",
+    "name": "List repository issues",
+    "description": "Lists issues in a repository. Note: GitHub's REST API considers every pull request an issue.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string", "description": "Repository owner's username." },
+        "repo": { "type": "string", "description": "Repository name." },
+        "state": { "type": "string", "enum": ["open", "closed", "all"] }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListRepositoryIssuesResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListRepositoryIssuesResponse": {
+          "type": "object",
+          "properties": {
+            "issues": { "type": "array", "items": { "$ref": "#/$defs/Issue" } }
+          }
+        },
+        "Issue": {
+          "type": "object",
+          "title": "Issue",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer", "description": "Issue number within the repository." },
+            "title": { "type": "string" },
+            "state": { "type": "string" },
+            "user": { "$ref": "#/$defs/User" }
+          },
+          "required": ["id", "number", "state"]
+        },
+        "User": {
+          "type": "object",
+          "title": "User",
+          "properties": {
+            "id": { "type": "integer" },
+            "login": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Issues", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_AN_ISSUE",
+    "name": "Create an issue",
+    "description": "Opens a new issue in a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" }
+      },
+      "required": ["owner", "repo", "title"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Issue" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Issue": {
+          "type": "object",
+          "title": "Issue",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer", "description": "Issue number within the repository." },
+            "html_url": { "type": "string" }
+          },
+          "required": ["id", "number"]
+        }
+      }
+    },
+    "tags": ["Issues", "createHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_AN_ISSUE_COMMENT",
+    "name": "Create an issue comment",
+    "description": "Adds a comment to an existing issue or pull request.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "issue_number": { "type": "integer", "description": "The number that identifies the issue." },
+        "body": { "type": "string" }
+      },
+      "required": ["owner", "repo", "issue_number", "body"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/CreateAnIssueCommentResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "CreateAnIssueCommentResponse": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "integer" },
+            "body": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Comments", "createHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_ADD_LABELS_TO_AN_ISSUE",
+    "name": "Add labels to an issue",
+    "description": "Adds labels to an issue.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "issue_number": { "type": "integer", "description": "The number that identifies the issue." },
+        "labels": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["owner", "repo", "issue_number", "labels"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/LabelListResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "LabelListResponse": {
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" } } } }
+          }
+        }
+      }
+    },
+    "tags": ["Issues", "updateHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_PULL_REQUESTS",
+    "name": "List pull requests",
+    "description": "Lists pull requests in a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "state": { "type": "string", "enum": ["open", "closed", "all"] }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListPullRequestsResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListPullRequestsResponse": {
+          "type": "object",
+          "properties": {
+            "pull_requests": { "type": "array", "items": { "$ref": "#/$defs/PullRequest" } }
+          }
+        },
+        "PullRequest": {
+          "type": "object",
+          "title": "PullRequest",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer", "description": "Pull request number within the repository." },
+            "state": { "type": "string" },
+            "head": { "$ref": "#/$defs/BranchRef" }
+          },
+          "required": ["id", "number", "state"]
+        },
+        "BranchRef": {
+          "type": "object",
+          "title": "BranchRef",
+          "properties": {
+            "ref": { "type": "string" },
+            "sha": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["pulls", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_MERGE_A_PULL_REQUEST",
+    "name": "Merge a pull request",
+    "description": "Merges an open, mergeable pull request.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "pull_number": { "type": "integer", "description": "The number that identifies the pull request." },
+        "merge_method": { "type": "string", "enum": ["merge", "squash", "rebase"] }
+      },
+      "required": ["owner", "repo", "pull_number"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/MergeAPullRequestResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "MergeAPullRequestResponse": {
+          "type": "object",
+          "properties": {
+            "sha": { "type": "string" },
+            "merged": { "type": "boolean" },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["pulls", "updateHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_PULL_REQUEST",
+    "name": "Get a pull request",
+    "description": "Retrieves details of a pull request.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "pull_number": { "type": "integer", "description": "The number that identifies the pull request." }
+      },
+      "required": ["owner", "repo", "pull_number"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/PullRequest" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "PullRequest": {
+          "type": "object",
+          "title": "PullRequest",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer" },
+            "mergeable": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "tags": ["pulls", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_MILESTONES",
+    "name": "List milestones",
+    "description": "Lists milestones for a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListMilestonesResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListMilestonesResponse": {
+          "type": "object",
+          "properties": {
+            "milestones": { "type": "array", "items": { "$ref": "#/$defs/Milestone" } }
+          }
+        },
+        "Milestone": {
+          "type": "object",
+          "title": "Milestone",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer", "description": "Milestone number within the repository." },
+            "title": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Issues", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_UPDATE_A_MILESTONE",
+    "name": "Update a milestone",
+    "description": "Updates a milestone.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "milestone_number": { "type": "integer", "description": "The number that identifies the milestone." },
+        "state": { "type": "string" }
+      },
+      "required": ["owner", "repo", "milestone_number"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Milestone" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Milestone": {
+          "type": "object",
+          "title": "Milestone",
+          "properties": { "id": { "type": "integer" }, "number": { "type": "integer" } }
+        }
+      }
+    },
+    "tags": ["Issues", "updateHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_REPOSITORY",
+    "name": "Get a repository",
+    "description": "Retrieves a repository by owner and name.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Repository" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Repository": {
+          "type": "object",
+          "title": "Repository",
+          "properties": {
+            "id": { "type": "integer", "description": "Unique identifier of the repository." },
+            "full_name": { "type": "string" },
+            "default_branch": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Repositories", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_REPOSITORY_INVITATIONS",
+    "name": "List repository invitations",
+    "description": "Lists pending invitations for a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListRepositoryInvitationsResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListRepositoryInvitationsResponse": {
+          "type": "object",
+          "properties": {
+            "invitations": { "type": "array", "items": { "$ref": "#/$defs/Invitation" } }
+          }
+        },
+        "Invitation": {
+          "type": "object",
+          "title": "Invitation",
+          "properties": { "id": { "type": "integer", "description": "Unique identifier of the invitation." } }
+        }
+      }
+    },
+    "tags": ["Invitations", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_ACCEPT_A_REPOSITORY_INVITATION",
+    "name": "Accept a repository invitation",
+    "description": "Accepts a repository invitation for the authenticated user.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "invitation_id": { "type": "integer", "description": "The unique identifier of the invitation." }
+      },
+      "required": ["invitation_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "type": "object" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Invitations", "updateHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_BRANCHES",
+    "name": "List branches",
+    "description": "Lists branches for a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListBranchesResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListBranchesResponse": {
+          "type": "object",
+          "properties": {
+            "branches": { "type": "array", "items": { "$ref": "#/$defs/Branch" } }
+          }
+        },
+        "Branch": {
+          "type": "object",
+          "title": "Branch",
+          "properties": {
+            "name": { "type": "string", "description": "The branch's name." },
+            "commit": { "$ref": "#/$defs/CommitRef" }
+          }
+        },
+        "CommitRef": {
+          "type": "object",
+          "title": "CommitRef",
+          "properties": { "sha": { "type": "string" } }
+        }
+      }
+    },
+    "tags": ["Repositories", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_BRANCH",
+    "name": "Get a branch",
+    "description": "Retrieves details of a single branch.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "branch": { "type": "string", "description": "The branch's name." }
+      },
+      "required": ["owner", "repo", "branch"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Branch" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Branch": {
+          "type": "object",
+          "title": "Branch",
+          "properties": { "name": { "type": "string" }, "protected": { "type": "boolean" } }
+        }
+      }
+    },
+    "tags": ["Repositories", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_COMMITS",
+    "name": "List commits",
+    "description": "Lists commits on a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListCommitsResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListCommitsResponse": {
+          "type": "object",
+          "properties": {
+            "commits": { "type": "array", "items": { "$ref": "#/$defs/Commit" } }
+          }
+        },
+        "Commit": {
+          "type": "object",
+          "title": "Commit",
+          "properties": {
+            "sha": { "type": "string", "description": "The SHA of the commit." },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Commits", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_A_COMMIT_COMMENT",
+    "name": "Create a commit comment",
+    "description": "Creates a comment on a commit.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "commit_sha": { "type": "string", "description": "The SHA of the commit." },
+        "body": { "type": "string" }
+      },
+      "required": ["owner", "repo", "commit_sha", "body"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "type": "object", "properties": { "id": { "type": "integer" } } },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Commits", "createHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  }
+]

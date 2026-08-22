@@ -1,0 +1,72 @@
+{
+  "nodes": [
+    {
+      "id": "SLACK_LIST_CONVERSATIONS",
+      "service": "conversations"
+    },
+    {
+      "id": "SLACK_CREATE_CHANNEL",
+      "service": "conversations"
+    },
+    {
+      "id": "SLACK_GET_CONVERSATION_HISTORY",
+      "service": "conversations"
+    },
+    {
+      "id": "SLACK_POST_MESSAGE",
+      "service": "messages"
+    },
+    {
+      "id": "SLACK_UPDATE_MESSAGE",
+      "service": "messages"
+    },
+    {
+      "id": "SLACK_ADD_REACTION",
+      "service": "messages"
+    },
+    {
+      "id": "SLACK_LIST_USERS",
+      "service": "users"
+    },
+    {
+      "id": "SLACK_LOOKUP_USER_BY_EMAIL",
+      "service": "users"
+    },
+    {
+      "id": "SLACK_GET_USER_INFO",
+      "service": "users"
+    },
+    {
+      "id": "SLACK_INVITE_TO_CONVERSATION",
+      "service": "conversations"
+    },
+    {
+      "id": "SLACK_LIST_CONVERSATION_MEMBERS",
+      "service": "conversations"
+    },
+    {
+      "id": "SLACK_PIN_MESSAGE",
+      "service": "messages"
+    },
+    {
+      "id": "SLACK_DELETE_MESSAGE",
+      "service": "messages"
+    },
+    {
+      "id": "SLACK_ARCHIVE_CONVERSATION",
+      "service": "conversations"
+    }
+  ],
+  "edges": [
+    {
+      "from": "SLACK_LIST_USERS",
+      "to": "SLACK_GET_USER_INFO",
+      "label": "user"
+    },
+    {
+      "from": "SLACK_LOOKUP_USER_BY_EMAIL",
+      "to": "SLACK_GET_USER_INFO",
+      "label": "user"
+    }
+  ]
+}
