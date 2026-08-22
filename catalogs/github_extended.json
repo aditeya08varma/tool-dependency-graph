@@ -1,0 +1,716 @@
+[
+  {
+    "slug": "GITHUB_LIST_RELEASES",
+    "name": "List releases",
+    "description": "Lists releases for a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" } },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListReleasesResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListReleasesResponse": { "type": "object", "properties": { "releases": { "type": "array", "items": { "$ref": "#/$defs/Release" } } } },
+        "Release": {
+          "type": "object", "title": "Release",
+          "properties": {
+            "id": { "type": "integer", "description": "Unique identifier of the release." },
+            "tag_name": { "type": "string" },
+            "name": { "type": "string" },
+            "assets": { "type": "array", "items": { "$ref": "#/$defs/ReleaseAsset" } }
+          }
+        },
+        "ReleaseAsset": {
+          "type": "object", "title": "ReleaseAsset",
+          "properties": { "id": { "type": "integer", "description": "Unique identifier of the release asset." }, "name": { "type": "string" } }
+        }
+      }
+    },
+    "tags": ["Releases", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_RELEASE",
+    "name": "Get a release",
+    "description": "Retrieves a release by its ID.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "release_id": { "type": "integer", "description": "The unique identifier of the release." } },
+      "required": ["owner", "repo", "release_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Release" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Release": {
+          "type": "object", "title": "Release",
+          "properties": { "id": { "type": "integer" }, "tag_name": { "type": "string" }, "assets": { "type": "array", "items": { "$ref": "#/$defs/ReleaseAsset" } } }
+        },
+        "ReleaseAsset": { "type": "object", "title": "ReleaseAsset", "properties": { "id": { "type": "integer" }, "name": { "type": "string" } } }
+      }
+    },
+    "tags": ["Releases", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_A_RELEASE",
+    "name": "Create a release",
+    "description": "Creates a new release.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "tag_name": { "type": "string", "description": "The name of the tag." } },
+      "required": ["owner", "repo", "tag_name"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Release" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Release": { "type": "object", "title": "Release", "properties": { "id": { "type": "integer" }, "tag_name": { "type": "string" } } } }
+    },
+    "tags": ["Releases", "createHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_DELETE_A_RELEASE",
+    "name": "Delete a release",
+    "description": "Deletes a release.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "release_id": { "type": "integer", "description": "The unique identifier of the release." } },
+      "required": ["owner", "repo", "release_id"]
+    },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Releases", "destructiveHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_RELEASE_ASSETS",
+    "name": "List release assets",
+    "description": "Lists assets attached to a release.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "release_id": { "type": "integer", "description": "The unique identifier of the release." } },
+      "required": ["owner", "repo", "release_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListReleaseAssetsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListReleaseAssetsResponse": { "type": "object", "properties": { "assets": { "type": "array", "items": { "$ref": "#/$defs/ReleaseAsset" } } } },
+        "ReleaseAsset": { "type": "object", "title": "ReleaseAsset", "properties": { "id": { "type": "integer", "description": "Unique identifier of the release asset." }, "name": { "type": "string" } } }
+      }
+    },
+    "tags": ["Releases", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_RELEASE_ASSET",
+    "name": "Get a release asset",
+    "description": "Retrieves a single release asset.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "asset_id": { "type": "integer", "description": "The unique identifier of the asset." } },
+      "required": ["owner", "repo", "asset_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ReleaseAsset" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "ReleaseAsset": { "type": "object", "title": "ReleaseAsset", "properties": { "id": { "type": "integer" }, "name": { "type": "string" }, "size": { "type": "integer" } } } }
+    },
+    "tags": ["Releases", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_DELETE_A_RELEASE_ASSET",
+    "name": "Delete a release asset",
+    "description": "Deletes a release asset.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "asset_id": { "type": "integer", "description": "The unique identifier of the asset." } },
+      "required": ["owner", "repo", "asset_id"]
+    },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Releases", "destructiveHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+
+  {
+    "slug": "GITHUB_LIST_REPOSITORY_WORKFLOWS",
+    "name": "List repository workflows",
+    "description": "Lists the workflows in a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" } },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListWorkflowsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListWorkflowsResponse": { "type": "object", "properties": { "workflows": { "type": "array", "items": { "$ref": "#/$defs/Workflow" } } } },
+        "Workflow": { "type": "object", "title": "Workflow", "properties": { "id": { "type": "integer", "description": "Unique identifier of the workflow." }, "name": { "type": "string" }, "state": { "type": "string" } } }
+      }
+    },
+    "tags": ["Actions", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_WORKFLOW",
+    "name": "Get a workflow",
+    "description": "Retrieves a workflow by ID.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "workflow_id": { "type": "integer", "description": "The ID of the workflow." } },
+      "required": ["owner", "repo", "workflow_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Workflow" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Workflow": { "type": "object", "title": "Workflow", "properties": { "id": { "type": "integer" }, "name": { "type": "string" } } } }
+    },
+    "tags": ["Actions", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_WORKFLOW_RUNS",
+    "name": "List workflow runs",
+    "description": "Lists runs for a specific workflow.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "workflow_id": { "type": "integer", "description": "The ID of the workflow." } },
+      "required": ["owner", "repo", "workflow_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListWorkflowRunsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListWorkflowRunsResponse": { "type": "object", "properties": { "workflow_runs": { "type": "array", "items": { "$ref": "#/$defs/WorkflowRun" } } } },
+        "WorkflowRun": { "type": "object", "title": "WorkflowRun", "properties": { "id": { "type": "integer", "description": "Unique identifier of the workflow run." }, "run_number": { "type": "integer" }, "status": { "type": "string" } } }
+      }
+    },
+    "tags": ["Actions", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_WORKFLOW_RUN",
+    "name": "Get a workflow run",
+    "description": "Retrieves a workflow run by ID.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "run_id": { "type": "integer", "description": "The unique identifier of the workflow run." } },
+      "required": ["owner", "repo", "run_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/WorkflowRun" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "WorkflowRun": { "type": "object", "title": "WorkflowRun", "properties": { "id": { "type": "integer" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["Actions", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CANCEL_A_WORKFLOW_RUN",
+    "name": "Cancel a workflow run",
+    "description": "Cancels a workflow run.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "run_id": { "type": "integer", "description": "The unique identifier of the workflow run." } },
+      "required": ["owner", "repo", "run_id"]
+    },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Actions", "updateHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_WORKFLOW_RUN_ARTIFACTS",
+    "name": "List workflow run artifacts",
+    "description": "Lists artifacts produced by a workflow run.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "run_id": { "type": "integer", "description": "The unique identifier of the workflow run." } },
+      "required": ["owner", "repo", "run_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListArtifactsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListArtifactsResponse": { "type": "object", "properties": { "artifacts": { "type": "array", "items": { "$ref": "#/$defs/Artifact" } } } },
+        "Artifact": { "type": "object", "title": "Artifact", "properties": { "id": { "type": "integer", "description": "Unique identifier of the artifact." }, "name": { "type": "string" }, "size_in_bytes": { "type": "integer" } } }
+      }
+    },
+    "tags": ["Actions", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_DOWNLOAD_AN_ARTIFACT",
+    "name": "Download an artifact",
+    "description": "Gets a redirect URL to download an artifact.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "artifact_id": { "type": "integer", "description": "The unique identifier of the artifact." } },
+      "required": ["owner", "repo", "artifact_id"]
+    },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object", "properties": { "url": { "type": "string" } } }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Actions", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_DELETE_AN_ARTIFACT",
+    "name": "Delete an artifact",
+    "description": "Deletes an artifact.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "artifact_id": { "type": "integer", "description": "The unique identifier of the artifact." } },
+      "required": ["owner", "repo", "artifact_id"]
+    },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Actions", "destructiveHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+
+  {
+    "slug": "GITHUB_LIST_GISTS_FOR_THE_AUTHENTICATED_USER",
+    "name": "List gists for the authenticated user",
+    "description": "Lists gists owned by the authenticated user.",
+    "inputParameters": { "type": "object", "properties": {}, "required": [] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListGistsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListGistsResponse": { "type": "object", "properties": { "gists": { "type": "array", "items": { "$ref": "#/$defs/Gist" } } } },
+        "Gist": { "type": "object", "title": "Gist", "properties": { "id": { "type": "string", "description": "The gist's unique ID." }, "description": { "type": "string" } } }
+      }
+    },
+    "tags": ["Gists", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_GIST",
+    "name": "Get a gist",
+    "description": "Retrieves a gist by ID.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "gist_id": { "type": "string", "description": "The unique identifier of the gist." } },
+      "required": ["gist_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Gist" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Gist": { "type": "object", "title": "Gist", "properties": { "id": { "type": "string" }, "description": { "type": "string" } } } }
+    },
+    "tags": ["Gists", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_A_GIST",
+    "name": "Create a gist",
+    "description": "Creates a new gist.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "description": { "type": "string" }, "public": { "type": "boolean" } },
+      "required": ["description"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Gist" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Gist": { "type": "object", "title": "Gist", "properties": { "id": { "type": "string" } } } }
+    },
+    "tags": ["Gists", "createHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_DELETE_A_GIST",
+    "name": "Delete a gist",
+    "description": "Deletes a gist.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "gist_id": { "type": "string", "description": "The unique identifier of the gist." } },
+      "required": ["gist_id"]
+    },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Gists", "destructiveHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_GIST_COMMENTS",
+    "name": "List gist comments",
+    "description": "Lists comments on a gist.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "gist_id": { "type": "string", "description": "The unique identifier of the gist." } },
+      "required": ["gist_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListGistCommentsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListGistCommentsResponse": { "type": "object", "properties": { "comments": { "type": "array", "items": { "$ref": "#/$defs/GistComment" } } } },
+        "GistComment": { "type": "object", "title": "GistComment", "properties": { "id": { "type": "integer", "description": "Unique identifier of the gist comment." }, "body": { "type": "string" } } }
+      }
+    },
+    "tags": ["Gists", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_UPDATE_A_GIST_COMMENT",
+    "name": "Update a gist comment",
+    "description": "Edits a gist comment.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "gist_id": { "type": "string" }, "comment_id": { "type": "integer", "description": "The unique identifier of the gist comment." }, "body": { "type": "string" } },
+      "required": ["gist_id", "comment_id", "body"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/GistComment" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "GistComment": { "type": "object", "title": "GistComment", "properties": { "id": { "type": "integer" }, "body": { "type": "string" } } } }
+    },
+    "tags": ["Gists", "updateHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+
+  {
+    "slug": "GITHUB_LIST_TEAMS",
+    "name": "List teams",
+    "description": "Lists teams in an organization.",
+    "inputParameters": { "type": "object", "properties": { "org": { "type": "string" } }, "required": ["org"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListTeamsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListTeamsResponse": { "type": "object", "properties": { "teams": { "type": "array", "items": { "$ref": "#/$defs/Team" } } } },
+        "Team": { "type": "object", "title": "Team", "properties": { "id": { "type": "integer" }, "slug": { "type": "string", "description": "The team's URL-friendly slug." }, "name": { "type": "string" } } }
+      }
+    },
+    "tags": ["Teams", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_TEAM_BY_NAME",
+    "name": "Get a team by name",
+    "description": "Retrieves a team by its slug.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "org": { "type": "string" }, "team_slug": { "type": "string", "description": "The slug of the team." } },
+      "required": ["org", "team_slug"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Team" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Team": { "type": "object", "title": "Team", "properties": { "id": { "type": "integer" }, "slug": { "type": "string" } } } }
+    },
+    "tags": ["Teams", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_TEAM_MEMBERS_IN_ORG",
+    "name": "List team members",
+    "description": "Lists members of a team.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "org": { "type": "string" }, "team_slug": { "type": "string", "description": "The slug of the team." } },
+      "required": ["org", "team_slug"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListMembersResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListMembersResponse": { "type": "object", "properties": { "members": { "type": "array", "items": { "$ref": "#/$defs/User" } } } },
+        "User": { "type": "object", "title": "User", "properties": { "id": { "type": "integer" }, "login": { "type": "string", "description": "The user's username." } } }
+      }
+    },
+    "tags": ["Teams", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_ADD_OR_UPDATE_TEAM_MEMBERSHIP",
+    "name": "Add or update team membership",
+    "description": "Adds a user to a team.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "org": { "type": "string" }, "team_slug": { "type": "string" }, "username": { "type": "string", "description": "The user's username." } },
+      "required": ["org", "team_slug", "username"]
+    },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Teams", "updateHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+
+  {
+    "slug": "GITHUB_LIST_REPOSITORY_PROJECTS",
+    "name": "List repository projects",
+    "description": "Lists classic projects for a repository.",
+    "inputParameters": { "type": "object", "properties": { "owner": { "type": "string" }, "repo": { "type": "string" } }, "required": ["owner", "repo"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListProjectsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListProjectsResponse": { "type": "object", "properties": { "projects": { "type": "array", "items": { "$ref": "#/$defs/Project" } } } },
+        "Project": { "type": "object", "title": "Project", "properties": { "id": { "type": "integer", "description": "Unique identifier of the project." }, "number": { "type": "integer" }, "name": { "type": "string" } } }
+      }
+    },
+    "tags": ["Projects", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_PROJECT",
+    "name": "Get a project",
+    "description": "Retrieves a classic project by ID.",
+    "inputParameters": { "type": "object", "properties": { "project_id": { "type": "integer", "description": "The unique identifier of the project." } }, "required": ["project_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Project" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Project": { "type": "object", "title": "Project", "properties": { "id": { "type": "integer" }, "number": { "type": "integer" } } } }
+    },
+    "tags": ["Projects", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_PROJECT_COLUMNS",
+    "name": "List project columns",
+    "description": "Lists columns in a classic project.",
+    "inputParameters": { "type": "object", "properties": { "project_id": { "type": "integer", "description": "The unique identifier of the project." } }, "required": ["project_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListColumnsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListColumnsResponse": { "type": "object", "properties": { "columns": { "type": "array", "items": { "$ref": "#/$defs/ProjectColumn" } } } },
+        "ProjectColumn": { "type": "object", "title": "ProjectColumn", "properties": { "id": { "type": "integer", "description": "Unique identifier of the project column." }, "name": { "type": "string" } } }
+      }
+    },
+    "tags": ["Projects", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_A_PROJECT_CARD",
+    "name": "Create a project card",
+    "description": "Creates a note card in a project column.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "column_id": { "type": "integer", "description": "The unique identifier of the column." }, "note": { "type": "string" } },
+      "required": ["column_id", "note"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ProjectCard" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "ProjectCard": { "type": "object", "title": "ProjectCard", "properties": { "id": { "type": "integer" } } } }
+    },
+    "tags": ["Projects", "createHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+
+  {
+    "slug": "GITHUB_LIST_DEPLOYMENTS",
+    "name": "List deployments",
+    "description": "Lists deployments for a repository.",
+    "inputParameters": { "type": "object", "properties": { "owner": { "type": "string" }, "repo": { "type": "string" } }, "required": ["owner", "repo"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListDeploymentsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListDeploymentsResponse": { "type": "object", "properties": { "deployments": { "type": "array", "items": { "$ref": "#/$defs/Deployment" } } } },
+        "Deployment": { "type": "object", "title": "Deployment", "properties": { "id": { "type": "integer", "description": "Unique identifier of the deployment." }, "sha": { "type": "string" }, "environment": { "type": "string" } } }
+      }
+    },
+    "tags": ["Deployments", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_DEPLOYMENT",
+    "name": "Get a deployment",
+    "description": "Retrieves a deployment by ID.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "deployment_id": { "type": "integer", "description": "The unique identifier of the deployment." } },
+      "required": ["owner", "repo", "deployment_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Deployment" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Deployment": { "type": "object", "title": "Deployment", "properties": { "id": { "type": "integer" }, "sha": { "type": "string" } } } }
+    },
+    "tags": ["Deployments", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_A_DEPLOYMENT_STATUS",
+    "name": "Create a deployment status",
+    "description": "Creates a status for a deployment.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "deployment_id": { "type": "integer" }, "state": { "type": "string", "enum": ["success", "failure", "pending"] } },
+      "required": ["owner", "repo", "deployment_id", "state"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/DeploymentStatus" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "DeploymentStatus": { "type": "object", "title": "DeploymentStatus", "properties": { "id": { "type": "integer" }, "state": { "type": "string" } } } }
+    },
+    "tags": ["Deployments", "createHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_DEPLOYMENT_STATUSES",
+    "name": "List deployment statuses",
+    "description": "Lists statuses for a deployment.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "deployment_id": { "type": "integer", "description": "The unique identifier of the deployment." } },
+      "required": ["owner", "repo", "deployment_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListStatusesResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListStatusesResponse": { "type": "object", "properties": { "statuses": { "type": "array", "items": { "$ref": "#/$defs/DeploymentStatus" } } } },
+        "DeploymentStatus": { "type": "object", "title": "DeploymentStatus", "properties": { "id": { "type": "integer" }, "state": { "type": "string" } } }
+      }
+    },
+    "tags": ["Deployments", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+
+  {
+    "slug": "GITHUB_LIST_CHECK_RUNS_FOR_A_REF",
+    "name": "List check runs for a ref",
+    "description": "Lists check runs for a commit ref.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "ref": { "type": "string", "description": "The commit SHA or branch/tag name." } },
+      "required": ["owner", "repo", "ref"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListCheckRunsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListCheckRunsResponse": { "type": "object", "properties": { "check_runs": { "type": "array", "items": { "$ref": "#/$defs/CheckRun" } } } },
+        "CheckRun": { "type": "object", "title": "CheckRun", "properties": { "id": { "type": "integer", "description": "Unique identifier of the check run." }, "name": { "type": "string" }, "status": { "type": "string" } } }
+      }
+    },
+    "tags": ["Checks", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_CHECK_RUN",
+    "name": "Get a check run",
+    "description": "Retrieves a check run by ID.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "check_run_id": { "type": "integer", "description": "The unique identifier of the check run." } },
+      "required": ["owner", "repo", "check_run_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/CheckRun" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "CheckRun": { "type": "object", "title": "CheckRun", "properties": { "id": { "type": "integer" }, "name": { "type": "string" } } } }
+    },
+    "tags": ["Checks", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_UPDATE_A_CHECK_RUN",
+    "name": "Update a check run",
+    "description": "Updates a check run.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "check_run_id": { "type": "integer" }, "status": { "type": "string", "enum": ["queued", "in_progress", "completed"] } },
+      "required": ["owner", "repo", "check_run_id", "status"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/CheckRun" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "CheckRun": { "type": "object", "title": "CheckRun", "properties": { "id": { "type": "integer" } } } }
+    },
+    "tags": ["Checks", "updateHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_CHECK_SUITES_FOR_A_REF",
+    "name": "List check suites for a ref",
+    "description": "Lists check suites for a commit ref.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "ref": { "type": "string", "description": "The commit SHA or branch/tag name." } },
+      "required": ["owner", "repo", "ref"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListCheckSuitesResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListCheckSuitesResponse": { "type": "object", "properties": { "check_suites": { "type": "array", "items": { "$ref": "#/$defs/CheckSuite" } } } },
+        "CheckSuite": { "type": "object", "title": "CheckSuite", "properties": { "id": { "type": "integer", "description": "Unique identifier of the check suite." }, "status": { "type": "string" } } }
+      }
+    },
+    "tags": ["Checks", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_CHECK_SUITE",
+    "name": "Get a check suite",
+    "description": "Retrieves a check suite by ID.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "check_suite_id": { "type": "integer", "description": "The unique identifier of the check suite." } },
+      "required": ["owner", "repo", "check_suite_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/CheckSuite" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "CheckSuite": { "type": "object", "title": "CheckSuite", "properties": { "id": { "type": "integer" } } } }
+    },
+    "tags": ["Checks", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+
+  {
+    "slug": "GITHUB_LIST_REPOSITORY_WEBHOOKS",
+    "name": "List repository webhooks",
+    "description": "Lists webhooks for a repository.",
+    "inputParameters": { "type": "object", "properties": { "owner": { "type": "string" }, "repo": { "type": "string" } }, "required": ["owner", "repo"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListHooksResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListHooksResponse": { "type": "object", "properties": { "hooks": { "type": "array", "items": { "$ref": "#/$defs/Webhook" } } } },
+        "Webhook": { "type": "object", "title": "Webhook", "properties": { "id": { "type": "integer", "description": "Unique identifier of the webhook." }, "name": { "type": "string" }, "active": { "type": "boolean" } } }
+      }
+    },
+    "tags": ["Webhooks", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_REPOSITORY_WEBHOOK",
+    "name": "Get a repository webhook",
+    "description": "Retrieves a webhook by ID.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "hook_id": { "type": "integer", "description": "The unique identifier of the webhook." } },
+      "required": ["owner", "repo", "hook_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Webhook" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Webhook": { "type": "object", "title": "Webhook", "properties": { "id": { "type": "integer" } } } }
+    },
+    "tags": ["Webhooks", "readOnlyHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_DELETE_A_REPOSITORY_WEBHOOK",
+    "name": "Delete a repository webhook",
+    "description": "Deletes a webhook.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "hook_id": { "type": "integer", "description": "The unique identifier of the webhook." } },
+      "required": ["owner", "repo", "hook_id"]
+    },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Webhooks", "destructiveHint"], "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_PING_A_REPOSITORY_WEBHOOK",
+    "name": "Ping a repository webhook",
+    "description": "Sends a ping event to a webhook.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "repo": { "type": "string" }, "hook_id": { "type": "integer", "description": "The unique identifier of the webhook." } },
+      "required": ["owner", "repo", "hook_id"]
+    },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Webhooks", "createHint"], "toolkit": { "slug": "github", "name": "github" }
+  }
+]
