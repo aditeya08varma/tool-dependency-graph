@@ -13,9 +13,10 @@
     "metrics": "node --import tsx src/metrics.ts",
     "build:web": "node web/build.mjs"
   },
-  "dependencies": {},
   "devDependencies": {
     "esbuild": "^0.28.2",
-    "tsx": "^4.19.0"
+    "tsx": "^4.19.0",
+    "vis-data": "^8.0.5",
+    "vis-network": "^10.1.2"
   }
 }
