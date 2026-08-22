@@ -58,6 +58,31 @@ test("node ids are always real catalog slugs (provenance)", () => {
   }
 });
 
+test("does not match enum-constrained params as dependencies (they're caller choices, not lookups)", () => {
+  const graph = runGenerator("catalogs/github_extended.json", "tests/.tmp.github_extended.json");
+  const statusEdges = graph.edges.filter((e: any) => e.label === "status" || e.label === "state");
+  assert.equal(
+    statusEdges.length, 0,
+    "status/state are enum-constrained (queued/in_progress/completed, success/failure/pending) -- caller picks one, nothing produces them",
+  );
+});
+
+test("high-confidence edges (single-word producer type name) are never wrong, per ground truth", async () => {
+  const { generateDetailed } = await import("../src/core.ts");
+  const catalog = JSON.parse(readFileSync("catalogs/github_extended.json", "utf-8"));
+  const truth = JSON.parse(readFileSync("tests/ground_truth.github_extended.json", "utf-8")).edges;
+  const truthKeys = new Set(truth.map((e: any) => `${e.from}->${e.to}->${e.label}`));
+
+  const { edges } = generateDetailed(catalog);
+  const wrongHighConfidence = edges.filter(
+    (e: any) => e.confidence === "high" && !truthKeys.has(`${e.from}->${e.to}->${e.label}`),
+  );
+  assert.equal(
+    wrongHighConfidence.length, 0,
+    `high-confidence edges should never be false positives; found: ${JSON.stringify(wrongHighConfidence)}`,
+  );
+});
+
 test("is deterministic across repeated runs", () => {
   const a = runGenerator("catalogs/github.json", "tests/.tmp.github.a.json");
   const b = runGenerator("catalogs/github.json", "tests/.tmp.github.b.json");

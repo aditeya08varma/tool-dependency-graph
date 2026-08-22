@@ -62,6 +62,26 @@ npm run score -- catalogs/github_extended.json tests/ground_truth.github_extende
 
 This is also how a real, previously-invisible bug got caught: the ambient-frequency threshold (originally 5%, calibrated against a much larger 893-tool catalog) was silently discarding real dependencies on the 42-tool catalog, because a genuinely scarce ID shared by 3-4 related tools (e.g. `gist_id` across gist endpoints) is >5% of only 42 tools. Recall on that catalog was 34% before raising the threshold to 15%, and 90% after — a one-line fix that ground-truth scoring caught and casual inspection of edge counts never would have. See `tests/ground_truth.*.json` for the full hand-worked reasoning behind every expected edge, including the two cases (`username`/`login`, `hook_id`/`Webhook`) deliberately left as known misses to document exactly where the tokenizer's limits are.
 
+## Closing the gaps the scorer found
+
+Two fixes landed from the precision/recall numbers above, and one deliberately didn't — worth walking through, because the one that didn't work is more informative than the ones that did.
+
+**A fix that looked right and wasn't.** The obvious-seeming theory: compound type names are right-headed in English ("WorkflowRun" is a kind of *run*, not a kind of *workflow*), so only trust the *last* word. Concrete counter-evidence killed it: `PullRequest` → `pull_number` (correct) and `WorkflowRun` → `workflow_id` (wrong) both work by matching the *first* word of a two-word compound — the exact same mechanism produces one true positive and one false positive. Position in the compound name doesn't correlate with correctness at all; the actual difference is whether "pull_number" is a real, known API convention, which is a fact about the domain, not the grammar. No lexical rule can see that.
+
+**A fix that did work.** `DeploymentStatus.id` was falsely satisfying an unrelated `status` enum parameter — a different bug entirely, since `status` (`queued`/`in_progress`/`completed`) was never asking for an ID in the first place. The real signal: a required param constrained by `enum` in its schema is a closed set of caller choices, not a lookup value. Excluding enum-constrained params from matching entirely fixed this with zero side effects (verified against both ground-truth catalogs — no regressions).
+
+**What that split reveals, precisely.** Every match now carries a confidence label: `high` when the producer's entire type name is a single word (`Issue`, `Release` — unambiguous), `low` when the match only works because of one word inside a multi-word compound, or via a loose bare-field overlap. Checked against ground truth: **0 of 37 high-confidence edges on the 42-tool catalog are wrong.** Every false positive lives in the low-confidence bucket — and so does every true positive that depends on a compound qualifier word (`pull_number`, `commit_sha`). That's not a flaw in the split; it's the same fact stated precisely: lexical matching genuinely cannot tell these apart, so isolating exactly which edges are unverifiable by lexical means — rather than either trusting or discarding all of them — is the honest place to stop without semantic help.
+
+**Where the LLM actually earns its cost.** `src/llm_refine.ts` runs on top of the deterministic pass, and only touches what the analysis above identified as genuinely ambiguous:
+1. **Validates low-confidence edges** — asks specifically "does a WorkflowRun's own id actually mean the same as a workflow's id?", not "find edges."
+2. **Fills unmatched required inputs** — the synonym/substring class (`username` vs `login`, `hook_id` vs `Webhook`) that no lexical rule can close, by name.
+
+```bash
+OPENAI_API_KEY=... OPENAI_BASE_URL=... npm run refine -- catalogs/github_extended.json --out dependency_graph.json
+```
+
+Without `OPENAI_API_KEY` set, this is a verified no-op: I diffed its output against the plain deterministic CLI and confirmed byte-identical edge sets — the tool works standalone, the LLM step is a pure opt-in addition, never a requirement. What I *can't* claim to have verified is the live LLM call itself — I don't have API credentials for this project, so the validation/fill-gap prompts are designed and reasoned through (see the module's own comments for exactly what each one asks and why) but not exercised end-to-end. That's an honest gap, not a hidden one.
+
 ## How the matching logic actually performs
 
 `npm run metrics -- catalogs/<name>.json` classifies every required input in a catalog into one of three buckets, instead of just reporting a raw edge count:

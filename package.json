@@ -12,6 +12,7 @@
     "demo:slack": "npm run generate -- catalogs/slack.json --out dependency_graph.slack.json && npm run viz -- dependency_graph.slack.json visualization.slack.html",
     "metrics": "node --import tsx src/metrics.ts",
     "score": "node --import tsx src/score.ts",
+    "refine": "node --import tsx src/llm_refine.ts",
     "build:web": "node web/build.mjs"
   },
   "devDependencies": {
@@ -19,5 +20,8 @@
     "tsx": "^4.19.0",
     "vis-data": "^8.0.5",
     "vis-network": "^10.1.2"
+  },
+  "dependencies": {
+    "openai": "^7.5.0"
   }
 }

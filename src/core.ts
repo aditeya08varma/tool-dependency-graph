@@ -18,6 +18,31 @@ export interface Graph {
   edges: Edge[];
 }
 
+/**
+ * "high" = the producer's enclosing type name is a single word (e.g. "Issue",
+ * "Release") -- there's no ambiguity about what it represents.
+ * "low" = the match only works because of ONE word inside a multi-word
+ * compound type name (e.g. "PullRequest", "WorkflowRun") or a bare-field
+ * context-overlap. Both mechanisms are used by real matches (PullRequest ->
+ * pull_number) and by wrong ones (WorkflowRun -> workflow_id) in exactly the
+ * same way -- no lexical rule can tell those apart, since it's a question of
+ * domain convention, not grammar. "low" is a flag for further review (e.g.
+ * an LLM judgment call), not a rejection.
+ */
+export type Confidence = "high" | "low";
+export interface DetailedEdge extends Edge {
+  confidence: Confidence;
+}
+export interface UnmatchedInput {
+  tool: string;
+  param: string;
+}
+export interface DetailedGraph {
+  nodes: Node[];
+  edges: DetailedEdge[];
+  unmatched: UnmatchedInput[];
+}
+
 export function slugOf(tool: Tool): string | undefined {
   return tool.slug ?? tool.name ?? tool.function?.name;
 }
@@ -36,6 +61,17 @@ function serviceOf(tool: Tool): string | undefined {
 export function requiredInputNames(tool: Tool): string[] {
   const req: string[] = tool.inputParameters?.required ?? [];
   return req.map(String);
+}
+
+// A required param constrained to an enum (e.g. status: queued|in_progress|
+// completed) is a closed set of caller choices, not a value fetched from
+// another tool -- excluding these is what stops a coincidental context-word
+// overlap (DeploymentStatus.id sharing "status" with an unrelated enum
+// param) from producing a nonsensical edge, without needing to guess at the
+// param's name shape (which would also reject legitimate non-"_id"-shaped
+// params like Slack's "user").
+function isEnumConstrained(tool: Tool, paramName: string): boolean {
+  return Array.isArray(tool.inputParameters?.properties?.[paramName]?.enum);
 }
 
 interface FieldRef {
@@ -147,7 +183,7 @@ function buildIndex(tools: Tool[]): Map<string, ProducerField[]> {
   return index;
 }
 
-export function generate(tools: Tool[]): Graph {
+export function generateDetailed(tools: Tool[]): DetailedGraph {
   const nodes: Node[] = tools
     .map((t) => ({ id: slugOf(t), service: serviceOf(t) }))
     .filter((n): n is Node => !!n.id);
@@ -180,7 +216,8 @@ export function generate(tools: Tool[]): Graph {
     }
   }
 
-  const edges: Edge[] = [];
+  const edges: DetailedEdge[] = [];
+  const unmatched: UnmatchedInput[] = [];
   const seen = new Set<string>();
 
   for (const tool of tools) {
@@ -190,22 +227,46 @@ export function generate(tools: Tool[]): Graph {
     for (const inputName of requiredInputNames(tool)) {
       const key = inputName.toLowerCase();
       if ((requiredByCount.get(key) ?? 0) > ambientCutoff) continue;
+      if (isEnumConstrained(tool, inputName)) continue;
 
-      const producers = new Map<string, ProducerField>();
-      for (const p of compoundIndex.get(key) ?? []) producers.set(p.slug, p);
+      // A single-word type name is unambiguous (the whole type IS the
+      // concept). A multi-word compound only works because of one word among
+      // several (e.g. "pull" in "PullRequest") -- that's the exact mechanism
+      // behind both real matches (pull_number) and wrong ones (workflow_id
+      // from "WorkflowRun"), so it can't be trusted without further review.
+      const producers = new Map<string, { field: ProducerField; confidence: Confidence }>();
+      for (const p of compoundIndex.get(key) ?? []) {
+        const confidence: Confidence = p.contextTokens.length === 1 ? "high" : "low";
+        const existing = producers.get(p.slug);
+        if (!existing || (existing.confidence === "low" && confidence === "high")) {
+          producers.set(p.slug, { field: p, confidence });
+        }
+      }
       for (const p of identifierFields) {
-        if (bareIdentifierMatch(p, inputName)) producers.set(p.slug, p);
+        if (bareIdentifierMatch(p, inputName) && !producers.has(p.slug)) {
+          producers.set(p.slug, { field: p, confidence: "low" });
+        }
       }
 
-      for (const p of producers.values()) {
+      if (producers.size === 0) {
+        unmatched.push({ tool: consumerSlug, param: inputName });
+        continue;
+      }
+
+      for (const { field: p, confidence } of producers.values()) {
         if (p.slug === consumerSlug) continue;
         const edgeKey = `${p.slug}->${consumerSlug}->${inputName}`;
         if (seen.has(edgeKey)) continue;
         seen.add(edgeKey);
-        edges.push({ from: p.slug, to: consumerSlug, label: inputName });
+        edges.push({ from: p.slug, to: consumerSlug, label: inputName, confidence });
       }
     }
   }
 
-  return { nodes, edges };
+  return { nodes, edges, unmatched };
+}
+
+export function generate(tools: Tool[]): Graph {
+  const { nodes, edges } = generateDetailed(tools);
+  return { nodes, edges: edges.map(({ from, to, label }) => ({ from, to, label })) };
 }

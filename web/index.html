@@ -34778,6 +34778,9 @@ input.vis-configuration.vis-config-range:focus::-ms-fill-upper {
     const req = tool.inputParameters?.required ?? [];
     return req.map(String);
   }
+  function isEnumConstrained(tool, paramName) {
+    return Array.isArray(tool.inputParameters?.properties?.[paramName]?.enum);
+  }
   function splitWords(name) {
     const words = name.match(/[A-Z][a-z0-9]*|[a-z0-9]+/g) ?? [name];
     return words.map((w) => w.toLowerCase());
@@ -34839,7 +34842,7 @@ input.vis-configuration.vis-config-range:focus::-ms-fill-upper {
     }
     return index2;
   }
-  function generate(tools) {
+  function generateDetailed(tools) {
     const nodes = tools.map((t) => ({ id: slugOf(t), service: serviceOf(t) })).filter((n) => !!n.id);
     const requiredByCount = /* @__PURE__ */ new Map();
     for (const tool of tools) {
@@ -34861,6 +34864,7 @@ input.vis-configuration.vis-config-range:focus::-ms-fill-upper {
       }
     }
     const edges = [];
+    const unmatched = [];
     const seen = /* @__PURE__ */ new Set();
     for (const tool of tools) {
       const consumerSlug = slugOf(tool);
@@ -34868,21 +34872,38 @@ input.vis-configuration.vis-config-range:focus::-ms-fill-upper {
       for (const inputName of requiredInputNames(tool)) {
         const key = inputName.toLowerCase();
         if ((requiredByCount.get(key) ?? 0) > ambientCutoff) continue;
+        if (isEnumConstrained(tool, inputName)) continue;
         const producers = /* @__PURE__ */ new Map();
-        for (const p of compoundIndex.get(key) ?? []) producers.set(p.slug, p);
-        for (const p of identifierFields) {
-          if (bareIdentifierMatch(p, inputName)) producers.set(p.slug, p);
+        for (const p of compoundIndex.get(key) ?? []) {
+          const confidence = p.contextTokens.length === 1 ? "high" : "low";
+          const existing = producers.get(p.slug);
+          if (!existing || existing.confidence === "low" && confidence === "high") {
+            producers.set(p.slug, { field: p, confidence });
+          }
         }
-        for (const p of producers.values()) {
+        for (const p of identifierFields) {
+          if (bareIdentifierMatch(p, inputName) && !producers.has(p.slug)) {
+            producers.set(p.slug, { field: p, confidence: "low" });
+          }
+        }
+        if (producers.size === 0) {
+          unmatched.push({ tool: consumerSlug, param: inputName });
+          continue;
+        }
+        for (const { field: p, confidence } of producers.values()) {
           if (p.slug === consumerSlug) continue;
           const edgeKey = `${p.slug}->${consumerSlug}->${inputName}`;
           if (seen.has(edgeKey)) continue;
           seen.add(edgeKey);
-          edges.push({ from: p.slug, to: consumerSlug, label: inputName });
+          edges.push({ from: p.slug, to: consumerSlug, label: inputName, confidence });
         }
       }
     }
-    return { nodes, edges };
+    return { nodes, edges, unmatched };
+  }
+  function generate(tools) {
+    const { nodes, edges } = generateDetailed(tools);
+    return { nodes, edges: edges.map(({ from: from2, to, label }) => ({ from: from2, to, label })) };
   }
 
   // web/app.ts
