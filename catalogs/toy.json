@@ -1,0 +1,64 @@
+[
+  {
+    "slug": "TOY_CREATE_WIDGET",
+    "name": "Create a widget",
+    "description": "Creates a new widget and returns it.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "name": { "type": "string" } },
+      "required": ["name"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Widget" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Widget": {
+          "type": "object",
+          "title": "Widget",
+          "properties": {
+            "id": { "type": "string", "description": "The widget's unique ID." },
+            "name": { "type": "string" }
+          },
+          "required": ["id", "name"]
+        }
+      }
+    },
+    "tags": ["Widgets", "createHint"],
+    "toolkit": { "slug": "toy", "name": "toy" }
+  },
+  {
+    "slug": "TOY_GET_WIDGET",
+    "name": "Get a widget",
+    "description": "Retrieves a widget by its ID.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "widget_id": { "type": "string", "description": "The ID of the widget to fetch." }
+      },
+      "required": ["widget_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Widget" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Widget": {
+          "type": "object",
+          "title": "Widget",
+          "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+        }
+      }
+    },
+    "tags": ["Widgets", "readOnlyHint"],
+    "toolkit": { "slug": "toy", "name": "toy" }
+  }
+]
