@@ -1,0 +1,58 @@
+# tool-dependency-graph
+
+Infers a **producer → consumer dependency graph** between API tools, from nothing but their JSON-schema catalogs — no hardcoded tool names, no LLM calls, no toolkit-specific logic.
+
+## The problem
+
+When an agent chains API calls together, some actions need information that only another action can supply first. A concrete example: to comment on a GitHub issue you need an `issue_number` — and the only way to get one is to have already called something like "list repository issues" or "create an issue." That's a **dependency**: `LIST_REPOSITORY_ISSUES → CREATE_AN_ISSUE_COMMENT`, connected by `issue_number`.
+
+Given a big catalog of tools (each with a declared input schema and output schema), this project builds that graph automatically — by figuring out, for every tool's required input, which *other* tool's output could plausibly supply it.
+
+## Why it's harder than it sounds
+
+The catalog format used here wraps every tool's output identically:
+
+```json
+{ "data": { "$ref": "#/$defs/SomeResponse" }, "error": "string", "successful": true }
+```
+
+Every tool looks the same from the outside — `{data, error, successful}`. The real fields are hidden one or more `$ref` hops deep inside `$defs`, so naive "compare the two schemas' top-level properties" matching finds nothing.
+
+Once you resolve that, the opposite problem shows up: almost every tool needs *some* form of scope (`owner`/`repo` on GitHub, `channel` on Slack). Those aren't dependencies — they're context the caller already has, not something looked up by calling another tool first. A matcher that doesn't distinguish the two produces a graph where everything appears connected to everything.
+
+## How it works
+
+`src/generate.ts` is a four-stage pipeline:
+
+1. **Resolve** — recursively walk each tool's `outputParameters`, following every `$ref`/`$defs` indirection (cycle-guarded and depth-capped, since these schemas can reference themselves), flattening the result into every reachable field, each tagged with the tokens of its nearest enclosing named type (e.g. a `number` field inside a type called `PullRequest` is tagged with `["pull", "request"]`).
+2. **Match, compound** — for each tool's required input, check whether any other tool has a field whose enclosing-type tokens plus field name form a matching compound (`pull` + `number` → `pull_number`). This is what lets `PullRequest.number` satisfy a consumer's `pull_number`, even though there's no field anywhere literally named `pull_number`.
+3. **Match, bare** — a field matched purely by its own name (`id`, `sha`, `ref`, …) is only trusted when it's shaped like a real identifier *and* its enclosing type shares a word with the consumer's param name — this is what lets a `User.id` field satisfy a `user` param without also matching every unrelated `*_id` param in the catalog.
+4. **Suppress ambient params** — any required input shared by more than ~5% of all tools in the catalog is treated as caller-supplied context, not a dependency, and dropped before matching. This is a *frequency* signal, not a list of known scope-param names — nothing toolkit-specific is hardcoded anywhere in this pipeline, which is what let it run against a second, structurally different catalog without modification.
+
+## Proof it generalizes
+
+The generator runs unmodified against two catalogs with different naming conventions:
+
+| Catalog | Tools | Edges | Notable catch |
+|---|---|---|---|
+| [`catalogs/github.json`](catalogs/github.json) | 16 | 14 | `LIST_REPOSITORY_ISSUES → CREATE_AN_ISSUE_COMMENT` via `issue_number`; `LIST_PULL_REQUESTS → GET_A_BRANCH` via `branch` — the latter wasn't hand-tuned for, it fell out of the same context-matching rule |
+| [`catalogs/slack.json`](catalogs/slack.json) | 14 | 2 | `LIST_USERS → GET_USER_INFO` via `user`, despite Slack's `user`/`channel` convention looking nothing like GitHub's `*_number`/`*_id` suffixes |
+
+Regenerate either with `npm run demo:github` / `npm run demo:slack`, or open the committed [`visualization.github.html`](visualization.github.html) / [`visualization.slack.html`](visualization.slack.html) directly — both are self-contained (the graph JSON is embedded inline, so there's no fetch/CORS dependency and no server needed).
+
+## Known limitation — and a confirmed instance of it
+
+Matching is purely lexical and structural; it has no semantic understanding of what a field *means*. Concretely, this surfaced a real false-positive class in this exact codebase: `GITHUB_MERGE_A_PULL_REQUEST`'s own output type is named `MergeAPullRequestResponse` — a name that embeds the tool's own action ("merge a pull request"), not a description of what its fields mean. Because the resolver tags a field's context with its *enclosing type's* tokens, `MergeAPullRequestResponse.sha` shares the token "pull" with a consumer's `pull_number` param purely by naming coincidence, producing a spurious edge — verified by manually auditing all 14 edges in the GitHub demo catalog.
+
+The underlying cause: RPC-style catalogs conventionally name a tool's own top-level response wrapper `<VerbNoun>Response`, which leaks the tool's own action name into context the same way a genuinely reused entity type (`Issue`, `PullRequest`, `User`) would — but a wrapper referenced from exactly one place isn't the same kind of signal as a type reused across many tools. A cleaner fix (weight context by how many places a type is `$ref`'d from) was considered and rejected here: at small catalog scale it broke a different, correct match (`Invitation`, which only happens to appear once in this demo catalog). Fixing this properly needs either a larger catalog to make the reuse-count signal reliable, or a small second pass that specifically discounts a tool's own top-level wrapper type. Left as an open, documented gap rather than patched with something fragile.
+
+## Running it
+
+```bash
+npm install
+npm run generate -- catalogs/github.json --out dependency_graph.json
+npm run viz -- dependency_graph.json visualization.html
+npm test
+```
+
+`generate.ts` takes any catalog in the same shape (array of tools, each with `slug`, `inputParameters.required`, `outputParameters.properties.data` resolving through `$defs`) — it isn't specific to either catalog committed here.
