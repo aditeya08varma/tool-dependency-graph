@@ -77,10 +77,28 @@ Two fixes landed from the precision/recall numbers above, and one deliberately d
 2. **Fills unmatched required inputs** — the synonym/substring class (`username` vs `login`, `hook_id` vs `Webhook`) that no lexical rule can close, by name.
 
 ```bash
-OPENAI_API_KEY=... OPENAI_BASE_URL=... npm run refine -- catalogs/github_extended.json --out dependency_graph.json
+npm run refine -- catalogs/github_extended.json --out dependency_graph.json
 ```
 
-Without `OPENAI_API_KEY` set, this is a verified no-op: I diffed its output against the plain deterministic CLI and confirmed byte-identical edge sets — the tool works standalone, the LLM step is a pure opt-in addition, never a requirement. What I *can't* claim to have verified is the live LLM call itself — I don't have API credentials for this project, so the validation/fill-gap prompts are designed and reasoned through (see the module's own comments for exactly what each one asks and why) but not exercised end-to-end. That's an honest gap, not a hidden one.
+(reads credentials from a local, gitignored `.env` — `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`; never committed, never hardcoded into tracked source.)
+
+Without an API key present, this is a verified no-op: diffed its output against the plain deterministic CLI and confirmed byte-identical edge sets — the tool works standalone, the LLM step is a pure opt-in addition, never a requirement.
+
+**With a live key (tested against Gemini via its OpenAI-compatibility endpoint), on the 42-tool catalog:**
+
+| | Deterministic only | + LLM refinement |
+|---|---|---|
+| Edges | 97 | 65 |
+| Precision | 0.567 | **0.846** |
+| Recall | 0.902 | 0.902 |
+| F1 | 0.696 | **0.873** |
+
+The LLM filtered 32 of 42 false positives to 10, without losing a single one of the 55 true positives — recall is unchanged, precision nearly doubled. The reasoning is specific and correct, not just a plausible-sounding rejection — e.g. it rejected `LIST_CHECK_RUNS_FOR_A_REF → GET_A_WORKFLOW_RUN [run_id]` with *"Check run IDs belong to the Check Runs API and are distinct from GitHub Actions workflow run IDs"*, which is exactly the semantic distinction lexical matching cannot make. It also correctly solved the specific synonym gap this step was built for: `LIST_TEAM_MEMBERS_IN_ORG → ADD_OR_UPDATE_TEAM_MEMBERSHIP [username]`, recognizing that a `User.login` field satisfies a `username` parameter despite sharing no tokens.
+
+Not a clean sweep, and worth naming precisely rather than rounding up to "it works":
+- **One new false positive**: `LIST_RELEASES → CREATE_A_RELEASE [tag_name]` — `tag_name` is caller-authored (like a title), not a fetched value; the model overreached here.
+- **Partial credit on the webhook gap**: found 3 of 5 expected `hook_id` edges, missing the ones where `GET_A_REPOSITORY_WEBHOOK` should *also* count as a producer — a limitation of the prompt only asking for one producer per gap, not a model failure.
+- **A subtler miss**: `GET_A_RELEASE`/`LIST_RELEASES` should also supply `asset_id` (a release nests an array of assets), but got rejected — very likely the model over-applying its own correct "release_id ≠ asset_id" reasoning without visibility into the nested array, since the validation prompt only passes tool descriptions, not resolved field paths. A real, fixable gap in the prompt's context, not evidence the approach doesn't work.
 
 ## How the matching logic actually performs
 
@@ -113,3 +131,5 @@ npm test
 ```
 
 `generate.ts` (and the pure logic in `core.ts` it wraps) takes any catalog in the same shape (array of tools, each with `slug`, `inputParameters.required`, `outputParameters.properties.data` resolving through `$defs`) — it isn't specific to either catalog committed here.
+
+To use `npm run refine` (the optional LLM step), copy `.env.example` to `.env` and fill in your own credentials — `.env` is gitignored and never committed.

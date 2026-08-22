@@ -72,7 +72,7 @@ Respond with strict JSON: {"decisions": [{"index": 0, "keep": true, "reason": "s
 
     try {
       const resp = await client.chat.completions.create({
-        model: "openai/gpt-4o",
+        model: process.env.OPENAI_MODEL ?? "openai/gpt-4o",
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
       });
@@ -136,7 +136,7 @@ Respond with strict JSON: {"found": [{"index": 0, "producer": "<tool slug>", "re
 
     try {
       const resp = await client.chat.completions.create({
-        model: "openai/gpt-4o",
+        model: process.env.OPENAI_MODEL ?? "openai/gpt-4o",
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
       });
