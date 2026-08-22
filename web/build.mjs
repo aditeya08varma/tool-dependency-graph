@@ -7,14 +7,17 @@
 import { build } from "esbuild";
 import { readFileSync, writeFileSync } from "fs";
 
-await build({
+const result = await build({
   entryPoints: ["web/app.ts"],
   bundle: true,
   format: "iife",
-  outfile: "web/app.bundle.js",
   target: "es2020",
   logLevel: "info",
+  write: false,
 });
+const appCode = result.outputFiles[0].text;
+// Also write it standalone for anyone who wants to inspect the bundle directly.
+writeFileSync("web/app.bundle.js", appCode, "utf-8");
 
 const githubCatalog = readFileSync("catalogs/github.json", "utf-8");
 const slackCatalog = readFileSync("catalogs/slack.json", "utf-8");
@@ -88,7 +91,9 @@ const html = `<!doctype html>
   const EXAMPLE_GITHUB = ${githubCatalog};
   const EXAMPLE_SLACK = ${slackCatalog};
 </script>
-<script src="app.bundle.js"></script>
+<script>
+${appCode.replace(/<\/script>/gi, "<\\/script>")}
+</script>
 </body>
 </html>`;
 
