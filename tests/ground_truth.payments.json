@@ -1,0 +1,595 @@
+{
+  "_comment": "Hand-derived ground truth for catalogs/payments.json (a payments/Stripe-style toolkit), generated from an explicit per-parameter producer list worked out by reading every tool's actual declared output schema.",
+  "edges": [
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_GET_A_CUSTOMER",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_GET_A_CUSTOMER",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_UPDATE_A_CUSTOMER",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_UPDATE_A_CUSTOMER",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_UPDATE_A_CUSTOMER",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_DELETE_A_CUSTOMER",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_DELETE_A_CUSTOMER",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_DELETE_A_CUSTOMER",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_LIST_PAYMENT_METHODS",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_LIST_PAYMENT_METHODS",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_LIST_PAYMENT_METHODS",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_LIST_PAYMENT_METHODS",
+      "to": "PAY_GET_A_PAYMENT_METHOD",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_ATTACH_A_PAYMENT_METHOD",
+      "to": "PAY_GET_A_PAYMENT_METHOD",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_LIST_PAYMENT_METHODS",
+      "to": "PAY_ATTACH_A_PAYMENT_METHOD",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_GET_A_PAYMENT_METHOD",
+      "to": "PAY_ATTACH_A_PAYMENT_METHOD",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_ATTACH_A_PAYMENT_METHOD",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_ATTACH_A_PAYMENT_METHOD",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_ATTACH_A_PAYMENT_METHOD",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_LIST_PAYMENT_METHODS",
+      "to": "PAY_DETACH_A_PAYMENT_METHOD",
+      "label": "pm_id"
+    },
+    {
+      "from": "PAY_GET_A_PAYMENT_METHOD",
+      "to": "PAY_DETACH_A_PAYMENT_METHOD",
+      "label": "pm_id"
+    },
+    {
+      "from": "PAY_ATTACH_A_PAYMENT_METHOD",
+      "to": "PAY_DETACH_A_PAYMENT_METHOD",
+      "label": "pm_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_CREATE_A_PAYMENT_INTENT",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_CREATE_A_PAYMENT_INTENT",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_CREATE_A_PAYMENT_INTENT",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_PAYMENT_INTENT",
+      "to": "PAY_GET_A_PAYMENT_INTENT",
+      "label": "payment_intent_id"
+    },
+    {
+      "from": "PAY_CONFIRM_A_PAYMENT_INTENT",
+      "to": "PAY_GET_A_PAYMENT_INTENT",
+      "label": "payment_intent_id"
+    },
+    {
+      "from": "PAY_CREATE_A_PAYMENT_INTENT",
+      "to": "PAY_CONFIRM_A_PAYMENT_INTENT",
+      "label": "payment_intent_id"
+    },
+    {
+      "from": "PAY_GET_A_PAYMENT_INTENT",
+      "to": "PAY_CONFIRM_A_PAYMENT_INTENT",
+      "label": "payment_intent_id"
+    },
+    {
+      "from": "PAY_LIST_PAYMENT_METHODS",
+      "to": "PAY_CONFIRM_A_PAYMENT_INTENT",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_GET_A_PAYMENT_METHOD",
+      "to": "PAY_CONFIRM_A_PAYMENT_INTENT",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_ATTACH_A_PAYMENT_METHOD",
+      "to": "PAY_CONFIRM_A_PAYMENT_INTENT",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_CREATE_A_PAYMENT_INTENT",
+      "to": "PAY_CANCEL_A_PAYMENT_INTENT",
+      "label": "payment_intent_id"
+    },
+    {
+      "from": "PAY_GET_A_PAYMENT_INTENT",
+      "to": "PAY_CANCEL_A_PAYMENT_INTENT",
+      "label": "payment_intent_id"
+    },
+    {
+      "from": "PAY_CONFIRM_A_PAYMENT_INTENT",
+      "to": "PAY_CANCEL_A_PAYMENT_INTENT",
+      "label": "payment_intent_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_CREATE_A_SETUP_INTENT",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_CREATE_A_SETUP_INTENT",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_CREATE_A_SETUP_INTENT",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_SETUP_INTENT",
+      "to": "PAY_GET_A_SETUP_INTENT",
+      "label": "setup_intent_id"
+    },
+    {
+      "from": "PAY_CREATE_A_SETUP_INTENT",
+      "to": "PAY_CONFIRM_A_SETUP_INTENT",
+      "label": "setup_intent_id"
+    },
+    {
+      "from": "PAY_GET_A_SETUP_INTENT",
+      "to": "PAY_CONFIRM_A_SETUP_INTENT",
+      "label": "setup_intent_id"
+    },
+    {
+      "from": "PAY_LIST_PAYMENT_METHODS",
+      "to": "PAY_CONFIRM_A_SETUP_INTENT",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_GET_A_PAYMENT_METHOD",
+      "to": "PAY_CONFIRM_A_SETUP_INTENT",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_ATTACH_A_PAYMENT_METHOD",
+      "to": "PAY_CONFIRM_A_SETUP_INTENT",
+      "label": "payment_method_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_LIST_CHARGES",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_LIST_CHARGES",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_LIST_CHARGES",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_LIST_CHARGES",
+      "to": "PAY_GET_A_CHARGE",
+      "label": "charge_id"
+    },
+    {
+      "from": "PAY_CONFIRM_A_PAYMENT_INTENT",
+      "to": "PAY_GET_A_CHARGE",
+      "label": "charge_id"
+    },
+    {
+      "from": "PAY_LIST_CHARGES",
+      "to": "PAY_CREATE_A_REFUND",
+      "label": "charge_id"
+    },
+    {
+      "from": "PAY_GET_A_CHARGE",
+      "to": "PAY_CREATE_A_REFUND",
+      "label": "charge_id"
+    },
+    {
+      "from": "PAY_CONFIRM_A_PAYMENT_INTENT",
+      "to": "PAY_CREATE_A_REFUND",
+      "label": "charge_id"
+    },
+    {
+      "from": "PAY_CREATE_A_REFUND",
+      "to": "PAY_GET_A_REFUND",
+      "label": "refund_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_LIST_INVOICES",
+      "label": "cust_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_LIST_INVOICES",
+      "label": "cust_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_LIST_INVOICES",
+      "label": "cust_id"
+    },
+    {
+      "from": "PAY_LIST_INVOICES",
+      "to": "PAY_GET_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_CREATE_AN_INVOICE",
+      "to": "PAY_GET_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_FINALIZE_AN_INVOICE",
+      "to": "PAY_GET_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_PAY_AN_INVOICE",
+      "to": "PAY_GET_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_CREATE_AN_INVOICE",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_CREATE_AN_INVOICE",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_CREATE_AN_INVOICE",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_LIST_INVOICES",
+      "to": "PAY_FINALIZE_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_CREATE_AN_INVOICE",
+      "to": "PAY_FINALIZE_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_GET_AN_INVOICE",
+      "to": "PAY_FINALIZE_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_PAY_AN_INVOICE",
+      "to": "PAY_FINALIZE_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_LIST_INVOICES",
+      "to": "PAY_PAY_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_CREATE_AN_INVOICE",
+      "to": "PAY_PAY_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_GET_AN_INVOICE",
+      "to": "PAY_PAY_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_FINALIZE_AN_INVOICE",
+      "to": "PAY_PAY_AN_INVOICE",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_CREATE_AN_INVOICE_ITEM",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_CREATE_AN_INVOICE_ITEM",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_CREATE_AN_INVOICE_ITEM",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_LIST_INVOICES",
+      "to": "PAY_CREATE_AN_INVOICE_ITEM",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_CREATE_AN_INVOICE",
+      "to": "PAY_CREATE_AN_INVOICE_ITEM",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_GET_AN_INVOICE",
+      "to": "PAY_CREATE_AN_INVOICE_ITEM",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_FINALIZE_AN_INVOICE",
+      "to": "PAY_CREATE_AN_INVOICE_ITEM",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_PAY_AN_INVOICE",
+      "to": "PAY_CREATE_AN_INVOICE_ITEM",
+      "label": "invoice_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_CREATE_A_SUBSCRIPTION",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_CREATE_A_SUBSCRIPTION",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_CREATE_A_SUBSCRIPTION",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_LIST_PRICES",
+      "to": "PAY_CREATE_A_SUBSCRIPTION",
+      "label": "price_id"
+    },
+    {
+      "from": "PAY_CREATE_A_PRICE",
+      "to": "PAY_CREATE_A_SUBSCRIPTION",
+      "label": "price_id"
+    },
+    {
+      "from": "PAY_GET_A_PRICE",
+      "to": "PAY_CREATE_A_SUBSCRIPTION",
+      "label": "price_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_LIST_SUBSCRIPTIONS",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_LIST_SUBSCRIPTIONS",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_LIST_SUBSCRIPTIONS",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_SUBSCRIPTION",
+      "to": "PAY_GET_A_SUBSCRIPTION",
+      "label": "subscription_id"
+    },
+    {
+      "from": "PAY_LIST_SUBSCRIPTIONS",
+      "to": "PAY_GET_A_SUBSCRIPTION",
+      "label": "subscription_id"
+    },
+    {
+      "from": "PAY_CREATE_A_SUBSCRIPTION",
+      "to": "PAY_CANCEL_A_SUBSCRIPTION",
+      "label": "subscription_id"
+    },
+    {
+      "from": "PAY_LIST_SUBSCRIPTIONS",
+      "to": "PAY_CANCEL_A_SUBSCRIPTION",
+      "label": "subscription_id"
+    },
+    {
+      "from": "PAY_GET_A_SUBSCRIPTION",
+      "to": "PAY_CANCEL_A_SUBSCRIPTION",
+      "label": "subscription_id"
+    },
+    {
+      "from": "PAY_CREATE_A_SUBSCRIPTION",
+      "to": "PAY_UPDATE_A_SUBSCRIPTION_ITEM",
+      "label": "subscription_item_id"
+    },
+    {
+      "from": "PAY_GET_A_SUBSCRIPTION",
+      "to": "PAY_UPDATE_A_SUBSCRIPTION_ITEM",
+      "label": "subscription_item_id"
+    },
+    {
+      "from": "PAY_LIST_PRICES",
+      "to": "PAY_UPDATE_A_SUBSCRIPTION_ITEM",
+      "label": "price_id"
+    },
+    {
+      "from": "PAY_CREATE_A_PRICE",
+      "to": "PAY_UPDATE_A_SUBSCRIPTION_ITEM",
+      "label": "price_id"
+    },
+    {
+      "from": "PAY_GET_A_PRICE",
+      "to": "PAY_UPDATE_A_SUBSCRIPTION_ITEM",
+      "label": "price_id"
+    },
+    {
+      "from": "PAY_CREATE_A_SUBSCRIPTION",
+      "to": "PAY_DELETE_A_SUBSCRIPTION_ITEM",
+      "label": "subscription_item_id"
+    },
+    {
+      "from": "PAY_GET_A_SUBSCRIPTION",
+      "to": "PAY_DELETE_A_SUBSCRIPTION_ITEM",
+      "label": "subscription_item_id"
+    },
+    {
+      "from": "PAY_LIST_PRODUCTS",
+      "to": "PAY_LIST_PRICES",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_CREATE_A_PRODUCT",
+      "to": "PAY_LIST_PRICES",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_GET_A_PRODUCT",
+      "to": "PAY_LIST_PRICES",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_GET_A_PRICE",
+      "to": "PAY_LIST_PRICES",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_LIST_PRICES",
+      "to": "PAY_GET_A_PRICE",
+      "label": "price_id"
+    },
+    {
+      "from": "PAY_CREATE_A_PRICE",
+      "to": "PAY_GET_A_PRICE",
+      "label": "price_id"
+    },
+    {
+      "from": "PAY_LIST_PRODUCTS",
+      "to": "PAY_CREATE_A_PRICE",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_CREATE_A_PRODUCT",
+      "to": "PAY_CREATE_A_PRICE",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_GET_A_PRODUCT",
+      "to": "PAY_CREATE_A_PRICE",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_GET_A_PRICE",
+      "to": "PAY_CREATE_A_PRICE",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_LIST_PRODUCTS",
+      "to": "PAY_GET_A_PRODUCT",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_CREATE_A_PRODUCT",
+      "to": "PAY_GET_A_PRODUCT",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_GET_A_PRICE",
+      "to": "PAY_GET_A_PRODUCT",
+      "label": "product_id"
+    },
+    {
+      "from": "PAY_CREATE_A_COUPON",
+      "to": "PAY_GET_A_COUPON",
+      "label": "coupon_id"
+    },
+    {
+      "from": "PAY_LIST_CUSTOMERS",
+      "to": "PAY_CREATE_A_DISCOUNT",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_GET_A_CUSTOMER",
+      "to": "PAY_CREATE_A_DISCOUNT",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_CUSTOMER",
+      "to": "PAY_CREATE_A_DISCOUNT",
+      "label": "customer_id"
+    },
+    {
+      "from": "PAY_CREATE_A_COUPON",
+      "to": "PAY_CREATE_A_DISCOUNT",
+      "label": "coupon_id"
+    },
+    {
+      "from": "PAY_GET_A_COUPON",
+      "to": "PAY_CREATE_A_DISCOUNT",
+      "label": "coupon_id"
+    }
+  ]
+}

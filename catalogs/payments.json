@@ -1,0 +1,578 @@
+[
+  {
+    "slug": "PAY_LIST_CUSTOMERS",
+    "name": "List customers",
+    "description": "Lists customers.",
+    "inputParameters": { "type": "object", "properties": {}, "required": [] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListCustomersResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListCustomersResponse": { "type": "object", "properties": { "customers": { "type": "array", "items": { "$ref": "#/$defs/Customer" } } } },
+        "Customer": { "type": "object", "title": "Customer", "properties": { "id": { "type": "string", "description": "Unique identifier for the customer." }, "email": { "type": "string" }, "name": { "type": "string" } } }
+      }
+    },
+    "tags": ["Customers", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_CUSTOMER",
+    "name": "Get a customer",
+    "description": "Retrieves a customer by ID.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string", "description": "The identifier of the customer to retrieve." } }, "required": ["customer_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Customer" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Customer": { "type": "object", "title": "Customer", "properties": { "id": { "type": "string" }, "email": { "type": "string" }, "default_payment_method": { "type": "string" } } } }
+    },
+    "tags": ["Customers", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CREATE_A_CUSTOMER",
+    "name": "Create a customer",
+    "description": "Creates a new customer.",
+    "inputParameters": { "type": "object", "properties": { "email": { "type": "string" }, "name": { "type": "string" } }, "required": ["email"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Customer" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Customer": { "type": "object", "title": "Customer", "properties": { "id": { "type": "string" }, "email": { "type": "string" } } } }
+    },
+    "tags": ["Customers", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_UPDATE_A_CUSTOMER",
+    "name": "Update a customer",
+    "description": "Updates a customer's details.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" }, "name": { "type": "string" } }, "required": ["customer_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Customer" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Customer": { "type": "object", "title": "Customer", "properties": { "id": { "type": "string" } } } }
+    },
+    "tags": ["Customers", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_DELETE_A_CUSTOMER",
+    "name": "Delete a customer",
+    "description": "Deletes a customer.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" } }, "required": ["customer_id"] },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Customers", "destructiveHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+
+  {
+    "slug": "PAY_LIST_PAYMENT_METHODS",
+    "name": "List payment methods",
+    "description": "Lists payment methods attached to a customer.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" } }, "required": ["customer_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListPaymentMethodsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListPaymentMethodsResponse": { "type": "object", "properties": { "payment_methods": { "type": "array", "items": { "$ref": "#/$defs/PaymentMethod" } } } },
+        "PaymentMethod": { "type": "object", "title": "PaymentMethod", "properties": { "id": { "type": "string", "description": "Unique identifier for the payment method, e.g. pm_1J2y3K." }, "type": { "type": "string" } } }
+      }
+    },
+    "tags": ["PaymentMethods", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_PAYMENT_METHOD",
+    "name": "Get a payment method",
+    "description": "Retrieves a payment method by ID.",
+    "inputParameters": { "type": "object", "properties": { "payment_method_id": { "type": "string", "description": "The identifier of the payment method." } }, "required": ["payment_method_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/PaymentMethod" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "PaymentMethod": { "type": "object", "title": "PaymentMethod", "properties": { "id": { "type": "string" }, "customer": { "type": "string" } } } }
+    },
+    "tags": ["PaymentMethods", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_ATTACH_A_PAYMENT_METHOD",
+    "name": "Attach a payment method",
+    "description": "Attaches a payment method to a customer.",
+    "inputParameters": { "type": "object", "properties": { "payment_method_id": { "type": "string" }, "customer_id": { "type": "string" } }, "required": ["payment_method_id", "customer_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/PaymentMethod" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "PaymentMethod": { "type": "object", "title": "PaymentMethod", "properties": { "id": { "type": "string" } } } }
+    },
+    "tags": ["PaymentMethods", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_DETACH_A_PAYMENT_METHOD",
+    "name": "Detach a payment method",
+    "description": "Detaches a payment method from its customer, using the legacy shorthand parameter name.",
+    "inputParameters": { "type": "object", "properties": { "pm_id": { "type": "string", "description": "The payment method identifier (legacy short form)." } }, "required": ["pm_id"] },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["PaymentMethods", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+
+  {
+    "slug": "PAY_CREATE_A_PAYMENT_INTENT",
+    "name": "Create a payment intent",
+    "description": "Creates a payment intent to collect a payment from a customer.",
+    "inputParameters": { "type": "object", "properties": { "amount": { "type": "integer" }, "currency": { "type": "string" }, "customer_id": { "type": "string" } }, "required": ["amount", "currency", "customer_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/PaymentIntent" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "PaymentIntent": { "type": "object", "title": "PaymentIntent", "properties": { "id": { "type": "string", "description": "Unique identifier for the payment intent, e.g. pi_1J2y3K." }, "status": { "type": "string" }, "client_secret": { "type": "string" } } } }
+    },
+    "tags": ["PaymentIntents", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_PAYMENT_INTENT",
+    "name": "Get a payment intent",
+    "description": "Retrieves a payment intent by ID.",
+    "inputParameters": { "type": "object", "properties": { "payment_intent_id": { "type": "string", "description": "The identifier of the payment intent." } }, "required": ["payment_intent_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/PaymentIntent" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "PaymentIntent": { "type": "object", "title": "PaymentIntent", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["PaymentIntents", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CONFIRM_A_PAYMENT_INTENT",
+    "name": "Confirm a payment intent",
+    "description": "Confirms a payment intent using a payment method.",
+    "inputParameters": { "type": "object", "properties": { "payment_intent_id": { "type": "string" }, "payment_method_id": { "type": "string" } }, "required": ["payment_intent_id", "payment_method_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/PaymentIntent" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "PaymentIntent": { "type": "object", "title": "PaymentIntent", "properties": { "id": { "type": "string" }, "status": { "type": "string" }, "latest_charge": { "type": "string", "description": "Identifier of the charge created by this confirmation." } } } }
+    },
+    "tags": ["PaymentIntents", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CANCEL_A_PAYMENT_INTENT",
+    "name": "Cancel a payment intent",
+    "description": "Cancels a payment intent.",
+    "inputParameters": { "type": "object", "properties": { "payment_intent_id": { "type": "string" } }, "required": ["payment_intent_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/PaymentIntent" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "PaymentIntent": { "type": "object", "title": "PaymentIntent", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["PaymentIntents", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+
+  {
+    "slug": "PAY_CREATE_A_SETUP_INTENT",
+    "name": "Create a setup intent",
+    "description": "Creates a setup intent to save a payment method for future use, without charging immediately.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" } }, "required": ["customer_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/SetupIntent" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "SetupIntent": { "type": "object", "title": "SetupIntent", "properties": { "id": { "type": "string", "description": "Unique identifier for the setup intent, e.g. seti_1J2y3K." }, "status": { "type": "string" } } } }
+    },
+    "tags": ["SetupIntents", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_SETUP_INTENT",
+    "name": "Get a setup intent",
+    "description": "Retrieves a setup intent by ID.",
+    "inputParameters": { "type": "object", "properties": { "setup_intent_id": { "type": "string" } }, "required": ["setup_intent_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/SetupIntent" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "SetupIntent": { "type": "object", "title": "SetupIntent", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["SetupIntents", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CONFIRM_A_SETUP_INTENT",
+    "name": "Confirm a setup intent",
+    "description": "Confirms a setup intent using a payment method.",
+    "inputParameters": { "type": "object", "properties": { "setup_intent_id": { "type": "string" }, "payment_method_id": { "type": "string" } }, "required": ["setup_intent_id", "payment_method_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/SetupIntent" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "SetupIntent": { "type": "object", "title": "SetupIntent", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["SetupIntents", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+
+  {
+    "slug": "PAY_LIST_CHARGES",
+    "name": "List charges",
+    "description": "Lists charges for a customer.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" } }, "required": ["customer_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListChargesResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListChargesResponse": { "type": "object", "properties": { "charges": { "type": "array", "items": { "$ref": "#/$defs/Charge" } } } },
+        "Charge": { "type": "object", "title": "Charge", "properties": { "id": { "type": "string", "description": "Unique identifier for the charge, e.g. ch_1J2y3K." }, "amount": { "type": "integer" }, "payment_intent": { "type": "string" } } }
+      }
+    },
+    "tags": ["Charges", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_CHARGE",
+    "name": "Get a charge",
+    "description": "Retrieves a charge by ID.",
+    "inputParameters": { "type": "object", "properties": { "charge_id": { "type": "string", "description": "The identifier of the charge." } }, "required": ["charge_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Charge" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Charge": { "type": "object", "title": "Charge", "properties": { "id": { "type": "string" }, "refunded": { "type": "boolean" } } } }
+    },
+    "tags": ["Charges", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CREATE_A_REFUND",
+    "name": "Create a refund",
+    "description": "Refunds a charge, in full or in part.",
+    "inputParameters": { "type": "object", "properties": { "charge_id": { "type": "string" }, "amount": { "type": "integer" } }, "required": ["charge_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Refund" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Refund": { "type": "object", "title": "Refund", "properties": { "id": { "type": "string", "description": "Unique identifier for the refund, e.g. re_1J2y3K." }, "status": { "type": "string" } } } }
+    },
+    "tags": ["Refunds", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_REFUND",
+    "name": "Get a refund",
+    "description": "Retrieves a refund by ID.",
+    "inputParameters": { "type": "object", "properties": { "refund_id": { "type": "string" } }, "required": ["refund_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Refund" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Refund": { "type": "object", "title": "Refund", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["Refunds", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+
+  {
+    "slug": "PAY_LIST_INVOICES",
+    "name": "List invoices",
+    "description": "Lists invoices for a customer, using a legacy shorthand parameter name.",
+    "inputParameters": { "type": "object", "properties": { "cust_id": { "type": "string", "description": "The customer identifier (legacy short form of customer_id)." } }, "required": ["cust_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListInvoicesResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListInvoicesResponse": { "type": "object", "properties": { "invoices": { "type": "array", "items": { "$ref": "#/$defs/Invoice" } } } },
+        "Invoice": { "type": "object", "title": "Invoice", "properties": { "id": { "type": "string", "description": "Unique identifier for the invoice, e.g. in_1J2y3K." }, "status": { "type": "string" }, "amount_due": { "type": "integer" } } }
+      }
+    },
+    "tags": ["Invoices", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_AN_INVOICE",
+    "name": "Get an invoice",
+    "description": "Retrieves an invoice by ID.",
+    "inputParameters": { "type": "object", "properties": { "invoice_id": { "type": "string" } }, "required": ["invoice_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Invoice" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Invoice": { "type": "object", "title": "Invoice", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["Invoices", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CREATE_AN_INVOICE",
+    "name": "Create an invoice",
+    "description": "Creates a draft invoice for a customer.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" } }, "required": ["customer_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Invoice" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Invoice": { "type": "object", "title": "Invoice", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["Invoices", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_FINALIZE_AN_INVOICE",
+    "name": "Finalize an invoice",
+    "description": "Finalizes a draft invoice, making it ready to be paid.",
+    "inputParameters": { "type": "object", "properties": { "invoice_id": { "type": "string" } }, "required": ["invoice_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Invoice" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Invoice": { "type": "object", "title": "Invoice", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["Invoices", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_PAY_AN_INVOICE",
+    "name": "Pay an invoice",
+    "description": "Pays an outstanding invoice.",
+    "inputParameters": { "type": "object", "properties": { "invoice_id": { "type": "string" } }, "required": ["invoice_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Invoice" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Invoice": { "type": "object", "title": "Invoice", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["Invoices", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CREATE_AN_INVOICE_ITEM",
+    "name": "Create an invoice item",
+    "description": "Adds a line item to a customer's next invoice.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" }, "invoice_id": { "type": "string" }, "amount": { "type": "integer" } }, "required": ["customer_id", "invoice_id", "amount"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/InvoiceItem" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "InvoiceItem": { "type": "object", "title": "InvoiceItem", "properties": { "id": { "type": "string", "description": "Unique identifier for the invoice item." }, "invoice": { "type": "string" } } } }
+    },
+    "tags": ["Invoices", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+
+  {
+    "slug": "PAY_CREATE_A_SUBSCRIPTION",
+    "name": "Create a subscription",
+    "description": "Subscribes a customer to a price.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" }, "price_id": { "type": "string" } }, "required": ["customer_id", "price_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Subscription" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Subscription": {
+          "type": "object", "title": "Subscription",
+          "properties": {
+            "id": { "type": "string", "description": "Unique identifier for the subscription, e.g. sub_1J2y3K." },
+            "status": { "type": "string" },
+            "items": { "type": "array", "items": { "$ref": "#/$defs/SubscriptionItem" } }
+          }
+        },
+        "SubscriptionItem": { "type": "object", "title": "SubscriptionItem", "properties": { "id": { "type": "string", "description": "Unique identifier for the subscription item." }, "price": { "type": "string" } } }
+      }
+    },
+    "tags": ["Subscriptions", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_LIST_SUBSCRIPTIONS",
+    "name": "List subscriptions",
+    "description": "Lists a customer's subscriptions.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" } }, "required": ["customer_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListSubscriptionsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListSubscriptionsResponse": { "type": "object", "properties": { "subscriptions": { "type": "array", "items": { "$ref": "#/$defs/Subscription" } } } },
+        "Subscription": { "type": "object", "title": "Subscription", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } }
+      }
+    },
+    "tags": ["Subscriptions", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_SUBSCRIPTION",
+    "name": "Get a subscription",
+    "description": "Retrieves a subscription by ID.",
+    "inputParameters": { "type": "object", "properties": { "subscription_id": { "type": "string" } }, "required": ["subscription_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Subscription" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Subscription": { "type": "object", "title": "Subscription", "properties": { "id": { "type": "string" }, "status": { "type": "string" }, "items": { "type": "array", "items": { "$ref": "#/$defs/SubscriptionItem" } } } },
+        "SubscriptionItem": { "type": "object", "title": "SubscriptionItem", "properties": { "id": { "type": "string" }, "price": { "type": "string" } } }
+      }
+    },
+    "tags": ["Subscriptions", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CANCEL_A_SUBSCRIPTION",
+    "name": "Cancel a subscription",
+    "description": "Cancels a subscription.",
+    "inputParameters": { "type": "object", "properties": { "subscription_id": { "type": "string" } }, "required": ["subscription_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Subscription" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Subscription": { "type": "object", "title": "Subscription", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } }
+    },
+    "tags": ["Subscriptions", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_UPDATE_A_SUBSCRIPTION_ITEM",
+    "name": "Update a subscription item",
+    "description": "Changes the price on an existing subscription item.",
+    "inputParameters": { "type": "object", "properties": { "subscription_item_id": { "type": "string" }, "price_id": { "type": "string" } }, "required": ["subscription_item_id", "price_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/SubscriptionItem" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "SubscriptionItem": { "type": "object", "title": "SubscriptionItem", "properties": { "id": { "type": "string" } } } }
+    },
+    "tags": ["Subscriptions", "updateHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_DELETE_A_SUBSCRIPTION_ITEM",
+    "name": "Delete a subscription item",
+    "description": "Removes an item from a subscription.",
+    "inputParameters": { "type": "object", "properties": { "subscription_item_id": { "type": "string" } }, "required": ["subscription_item_id"] },
+    "outputParameters": { "type": "object", "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } }, "required": ["data", "successful"], "$defs": {} },
+    "tags": ["Subscriptions", "destructiveHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+
+  {
+    "slug": "PAY_LIST_PRICES",
+    "name": "List prices",
+    "description": "Lists prices for a product.",
+    "inputParameters": { "type": "object", "properties": { "product_id": { "type": "string" } }, "required": ["product_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListPricesResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListPricesResponse": { "type": "object", "properties": { "prices": { "type": "array", "items": { "$ref": "#/$defs/Price" } } } },
+        "Price": { "type": "object", "title": "Price", "properties": { "id": { "type": "string", "description": "Unique identifier for the price, e.g. price_1J2y3K." }, "unit_amount": { "type": "integer" } } }
+      }
+    },
+    "tags": ["Prices", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_PRICE",
+    "name": "Get a price",
+    "description": "Retrieves a price by ID.",
+    "inputParameters": { "type": "object", "properties": { "price_id": { "type": "string" } }, "required": ["price_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Price" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Price": { "type": "object", "title": "Price", "properties": { "id": { "type": "string" }, "product": { "type": "string" } } } }
+    },
+    "tags": ["Prices", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CREATE_A_PRICE",
+    "name": "Create a price",
+    "description": "Creates a new price for a product, optionally recurring.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "product_id": { "type": "string" },
+        "unit_amount": { "type": "integer" },
+        "interval": { "type": "string", "enum": ["day", "week", "month", "year"], "description": "Billing frequency for a recurring price." }
+      },
+      "required": ["product_id", "unit_amount"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Price" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Price": { "type": "object", "title": "Price", "properties": { "id": { "type": "string" } } } }
+    },
+    "tags": ["Prices", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+
+  {
+    "slug": "PAY_LIST_PRODUCTS",
+    "name": "List products",
+    "description": "Lists products.",
+    "inputParameters": { "type": "object", "properties": {}, "required": [] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/ListProductsResponse" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListProductsResponse": { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/Product" } } } },
+        "Product": { "type": "object", "title": "Product", "properties": { "id": { "type": "string", "description": "Unique identifier for the product, e.g. prod_1J2y3K." }, "name": { "type": "string" } } }
+      }
+    },
+    "tags": ["Products", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_PRODUCT",
+    "name": "Get a product",
+    "description": "Retrieves a product by ID.",
+    "inputParameters": { "type": "object", "properties": { "product_id": { "type": "string" } }, "required": ["product_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Product" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Product": { "type": "object", "title": "Product", "properties": { "id": { "type": "string" }, "name": { "type": "string" } } } }
+    },
+    "tags": ["Products", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CREATE_A_PRODUCT",
+    "name": "Create a product",
+    "description": "Creates a new product.",
+    "inputParameters": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Product" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Product": { "type": "object", "title": "Product", "properties": { "id": { "type": "string" }, "name": { "type": "string" } } } }
+    },
+    "tags": ["Products", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+
+  {
+    "slug": "PAY_CREATE_A_COUPON",
+    "name": "Create a coupon",
+    "description": "Creates a discount coupon.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "percent_off": { "type": "number" },
+        "duration": { "type": "string", "enum": ["forever", "once", "repeating"], "description": "How long the coupon discount applies." }
+      },
+      "required": ["percent_off", "duration"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Coupon" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Coupon": { "type": "object", "title": "Coupon", "properties": { "id": { "type": "string", "description": "Unique identifier for the coupon, e.g. co_1J2y3K." } } } }
+    },
+    "tags": ["Coupons", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_GET_A_COUPON",
+    "name": "Get a coupon",
+    "description": "Retrieves a coupon by ID.",
+    "inputParameters": { "type": "object", "properties": { "coupon_id": { "type": "string" } }, "required": ["coupon_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Coupon" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Coupon": { "type": "object", "title": "Coupon", "properties": { "id": { "type": "string" } } } }
+    },
+    "tags": ["Coupons", "readOnlyHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  },
+  {
+    "slug": "PAY_CREATE_A_DISCOUNT",
+    "name": "Create a discount",
+    "description": "Applies a coupon to a customer as a discount.",
+    "inputParameters": { "type": "object", "properties": { "customer_id": { "type": "string" }, "coupon_id": { "type": "string" } }, "required": ["customer_id", "coupon_id"] },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "$ref": "#/$defs/Discount" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": { "Discount": { "type": "object", "title": "Discount", "properties": { "id": { "type": "string" }, "coupon": { "type": "string" }, "customer": { "type": "string" } } } }
+    },
+    "tags": ["Discounts", "createHint"], "toolkit": { "slug": "payments", "name": "payments" }
+  }
+]
