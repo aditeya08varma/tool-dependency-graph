@@ -140,6 +140,17 @@ function outputFields(tool: Tool): FieldRef[] {
   return collected;
 }
 
+/** Every field a tool's output actually declares, as "Type.field" -- for
+ * grounding an LLM prompt in the real schema instead of letting it fill gaps
+ * from background knowledge of what a similar real-world API "usually" has
+ * (e.g. assuming a Slack user profile includes an email field because real
+ * ones do, when this catalog's declared schema doesn't say so). */
+export function declaredOutputFields(tool: Tool): string[] {
+  const seen = new Set<string>();
+  for (const f of outputFields(tool)) seen.add(`${f.defName}.${f.fieldName}`);
+  return [...seen];
+}
+
 // A bare field name (no context prefix) is only trusted as a signal if it's
 // shaped like a resource identifier, and even then only when its enclosing
 // context is semantically related to the consumer param -- this is what

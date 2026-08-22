@@ -23,7 +23,7 @@
  */
 import { readFileSync, writeFileSync } from "fs";
 import OpenAI from "openai";
-import { generateDetailed, slugOf, type Tool, type Graph, type DetailedEdge, type UnmatchedInput } from "./core.ts";
+import { generateDetailed, slugOf, declaredOutputFields, type Tool, type Graph, type DetailedEdge, type UnmatchedInput } from "./core.ts";
 
 function loadCatalog(path: string): Tool[] {
   const data = JSON.parse(readFileSync(path, "utf-8"));
@@ -111,13 +111,15 @@ async function fillUnmatchedInputs(
 ): Promise<{ found: DetailedEdge[]; raw: any[] }> {
   if (unmatched.length === 0) return { found: [], raw: [] };
 
-  // Cheap producer summary: slug + description + resolved output field names
-  // (reuse the same field-collection the deterministic pass already computed
-  // via generateDetailed, but we only have final edges here, so give the LLM
-  // slug + description + declared output property names as a starting point).
+  // Include each tool's ACTUAL declared output fields, not just its
+  // description -- without this, the model fills gaps from background
+  // knowledge of what a similar real-world API "usually" returns (e.g.
+  // assuming a Slack profile has an email field because real ones do), not
+  // from what this catalog actually declares.
   const producerSummaries = tools.map((t) => ({
     slug: slugOf(t),
     description: t.description,
+    declared_output_fields: declaredOutputFields(t),
   })).filter((p) => p.slug);
 
   const found: DetailedEdge[] = [];
@@ -128,11 +130,16 @@ async function fillUnmatchedInputs(
     const items = batch.map((u, idx) => ({
       index: idx,
       consumer: u.tool,
+      consumer_description: toolBySlug.get(u.tool)?.description,
       required_param: u.param,
       param_description: toolBySlug.get(u.tool)?.inputParameters?.properties?.[u.param]?.description,
     }));
 
     const prompt = `A deterministic name-matcher found NO producer for each required parameter below -- often because of a synonym (e.g. a tool returns "login" but another requires "username") or a substring the matcher's word-tokenizer doesn't credit (e.g. "Webhook" vs "hook_id"). For each item, list EVERY tool whose output plausibly supplies that exact value under a different name -- there may be more than one valid producer (e.g. both a "list" and a "get" endpoint for the same entity), so don't stop at the first one you find. If nothing plausible exists (e.g. it's genuinely user-authored content like a title or message body), omit it.
+
+Only propose a producer whose "declared_output_fields" list actually contains a field that plausibly maps to the required parameter. Do NOT propose a producer based on what a similar real-world API would typically return if this catalog's declared fields don't actually include it -- e.g. don't assume a user-profile tool returns an email just because real ones often do; check whether "email" (or an equivalent field) is actually in its declared_output_fields first.
+
+Watch specifically for parameters on a CREATE-style tool that happen to share a name with a field on the entity that tool creates -- that's usually the caller inventing a brand-new value, not looking one up. Example: "tag_name" on a "create a release" tool is the caller naming a NEW tag (like "v2.0.0") right then; the fact that existing releases also happen to have a "tag_name" field doesn't mean you should fetch it from one of them -- there's nothing to look up, the value doesn't exist yet until this call creates it. Only propose a producer when the value must already exist somewhere before this call can succeed.
 
 Available tools:
 ${JSON.stringify(producerSummaries.slice(0, 300), null, 0)}

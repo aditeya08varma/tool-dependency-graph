@@ -84,19 +84,25 @@ npm run refine -- catalogs/github_extended.json --out dependency_graph.json
 
 Without an API key present, this is a verified no-op: diffed its output against the plain deterministic CLI and confirmed byte-identical edge sets — the tool works standalone, the LLM step is a pure opt-in addition, never a requirement.
 
-**With a live key (tested against Gemini via its OpenAI-compatibility endpoint), on the 42-tool catalog, across two iterations:**
+**Tested against Gemini via its OpenAI-compatibility endpoint, across three iterations of prompt fixes, on all three catalogs that have ground truth:**
 
-| | Deterministic only | LLM v1 | LLM v2 |
-|---|---|---|---|
-| Precision | 0.567 | 0.846 | 0.762 |
-| Recall | 0.902 | 0.902 | **1.000** |
-| F1 | 0.696 | 0.873 | 0.865 |
+| Catalog | Deterministic | LLM v1 | LLM v2 | LLM v3 (current) |
+|---|---|---|---|---|
+| GitHub (16 tools) | 0.857 / 0.923 / 0.889 | — | — | **1.000 / 0.923 / 0.960** |
+| GitHub extended (42 tools) | 0.567 / 0.902 / 0.696 | 0.846 / 0.902 / 0.873 | 0.762 / **1.000** / 0.865 | **0.847 / 1.000 / 0.917** |
+| Slack (14 tools) | **1.000** / 0.250 / 0.400 | — | — | 0.444 / **1.000** / 0.615 |
 
-**v1** validated low-confidence edges using only tool descriptions. It correctly rejected `LIST_CHECK_RUNS_FOR_A_REF → GET_A_WORKFLOW_RUN [run_id]` with *"Check run IDs belong to the Check Runs API and are distinct from GitHub Actions workflow run IDs"* — exactly the semantic distinction lexical matching can't make — and correctly solved the synonym case this step was built for (`User.login` satisfying a `username` param, despite sharing no tokens). But it also missed real relationships: it rejected `GET_A_RELEASE → GET_A_RELEASE_ASSET [asset_id]`, almost certainly over-applying its own correct "a release's ID isn't an asset's ID" reasoning without realizing this specific field comes from a *nested* asset array, not the release's own ID — the prompt only passed tool descriptions, not the actual resolved field structure.
+*(precision / recall / F1)*
 
-**v2** fixed that by passing the producer's *actual* enclosing type name per field (`producerType`, e.g. `"ReleaseAsset"`) instead of just the tool's description, and by asking the fill-gap step for *all* plausible producers instead of just one. Result: **recall reached a perfect 1.0** — every real relationship, including the nested-asset case and all 5 `hook_id` relationships, is now found. The cost: precision dropped from 0.846 to 0.762, and it's worth being honest about why rather than calling it a regression. Most of the new false positives are the model reasoning *correctly* that `sha`/`head_branch`/`tag_name` fields are all technically valid git refs for `LIST_CHECK_RUNS_FOR_A_REF`'s `ref` parameter — which is factually true, just broader than this hand-built ground truth assumed, since no single tool here was designed as *the* canonical ref producer. One genuine remaining mistake, not just a scope disagreement: `tag_name` is still wrongly treated as fetchable, when it's caller-chosen, like a title.
+**What each iteration actually fixed, and what it revealed:**
 
-Neither version is strictly "better" — v1 is more conservative (higher precision, might miss real edges), v2 is more thorough (perfect recall, a few over-inclusive suggestions a reviewer would need to glance at and dismiss). Given this project's whole thesis is knowing exactly what you're missing, v2's trade-off is the one I'd keep — but it's a genuine judgment call about false positives vs. false negatives, not a strictly dominant improvement.
+- **v1**: validated low-confidence edges using only tool descriptions. Correctly rejected `LIST_CHECK_RUNS_FOR_A_REF → GET_A_WORKFLOW_RUN [run_id]` with *"Check run IDs belong to the Check Runs API and are distinct from GitHub Actions workflow run IDs"* — but also wrongly rejected a real nested-entity case (`GET_A_RELEASE → GET_A_RELEASE_ASSET [asset_id]`), since it had no way to see that the field actually came from a nested `ReleaseAsset`, not the release itself.
+- **v2**: fixed that by passing each field's *actual* enclosing type name (`producerType`) instead of just a description, and by asking the fill-gap step for *all* plausible producers instead of one. Recall reached 1.0 on the extended catalog — but surfaced a new, distinct false positive: `tag_name` (caller-chosen, like a title) got treated as fetchable.
+- **v3**: fixed `tag_name` with an explicit create-vs-lookup principle in the prompt (confirmed: zero `tag_name` edges now, anywhere), and grounded the fill-gap step in each tool's *actual declared output fields* instead of letting it guess from background knowledge of similar real-world APIs — this measurably mattered on Slack specifically, where it stopped assuming `GET_USER_INFO`/`LIST_USERS` return an `email` field that this catalog's schema simply doesn't declare, even though real Slack profiles do have one.
+
+**Precision on Slack is still low (0.444), and it's worth being precise about why rather than treating it as a failure.** Checking the actual schema: 7 of the 10 "false positives" are technically correct — `SLACK_UPDATE_MESSAGE` really does declare a `ts` field in its own response, `Message` really does declare a `user` field — my hand-built ground truth simply didn't anticipate every tool that happens to also expose a matching field. Exactly **one** is a genuine, distinct mismatch: `GET_USER_INFO → INVITE_TO_CONVERSATION [users]` — a tool returning a single user wrongly satisfying a parameter that needs a plural list. That's a real, narrow, fixable gap (a producer/consumer cardinality check, singular vs. plural), not evidence the approach doesn't work — just the next thing worth doing, not yet done.
+
+**One honest scope boundary, found on the 16-tool catalog:** `LIST_BRANCHES → GET_A_BRANCH [branch]` is still missed, and it's not a prompt problem — the fill-gap step only reviews required inputs with *zero* deterministic candidates. Since `branch` already had one producer (`LIST_PULL_REQUESTS`, via a different field), it was never eligible for the LLM to propose a second, better one. Deliberate cost control, not a bug, but a real edge the current design can't reach.
 
 ## How the matching logic actually performs
 

@@ -1,0 +1,13 @@
+{
+  "_comment": "Hand-derived ground truth for catalogs/slack.json, worked out independently of generate()'s actual output.",
+  "edges": [
+    { "from": "SLACK_LIST_USERS", "to": "SLACK_GET_USER_INFO", "label": "user" },
+    { "from": "SLACK_LOOKUP_USER_BY_EMAIL", "to": "SLACK_GET_USER_INFO", "label": "user" },
+    { "from": "SLACK_LIST_USERS", "to": "SLACK_INVITE_TO_CONVERSATION", "label": "users" },
+    { "from": "SLACK_LOOKUP_USER_BY_EMAIL", "to": "SLACK_INVITE_TO_CONVERSATION", "label": "users" },
+    { "from": "SLACK_POST_MESSAGE", "to": "SLACK_UPDATE_MESSAGE", "label": "ts", "_note": "same literal field name 'ts', but 'ts' isn't identifier-shaped (doesn't end in _id/_number/etc) so the deterministic pass misses even this exact-name case -- expected miss" },
+    { "from": "SLACK_POST_MESSAGE", "to": "SLACK_DELETE_MESSAGE", "label": "ts", "_note": "expected miss, same reason" },
+    { "from": "SLACK_POST_MESSAGE", "to": "SLACK_ADD_REACTION", "label": "timestamp", "_note": "genuine synonym: produced as 'ts', required as 'timestamp' -- expected miss" },
+    { "from": "SLACK_POST_MESSAGE", "to": "SLACK_PIN_MESSAGE", "label": "timestamp", "_note": "expected miss, same reason" }
+  ]
+}
