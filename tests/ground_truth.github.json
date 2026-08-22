@@ -1,0 +1,18 @@
+{
+  "_comment": "Hand-derived ground truth for catalogs/github.json — every producer/consumer relationship a human reviewer would expect to exist, worked out independently of what generate() actually outputs. Used by npm run score to compute real precision/recall instead of eyeballing edges.",
+  "edges": [
+    { "from": "GITHUB_LIST_REPOSITORY_ISSUES", "to": "GITHUB_CREATE_AN_ISSUE_COMMENT", "label": "issue_number" },
+    { "from": "GITHUB_CREATE_AN_ISSUE", "to": "GITHUB_CREATE_AN_ISSUE_COMMENT", "label": "issue_number" },
+    { "from": "GITHUB_LIST_REPOSITORY_ISSUES", "to": "GITHUB_ADD_LABELS_TO_AN_ISSUE", "label": "issue_number" },
+    { "from": "GITHUB_CREATE_AN_ISSUE", "to": "GITHUB_ADD_LABELS_TO_AN_ISSUE", "label": "issue_number" },
+    { "from": "GITHUB_LIST_PULL_REQUESTS", "to": "GITHUB_MERGE_A_PULL_REQUEST", "label": "pull_number" },
+    { "from": "GITHUB_GET_A_PULL_REQUEST", "to": "GITHUB_MERGE_A_PULL_REQUEST", "label": "pull_number" },
+    { "from": "GITHUB_LIST_PULL_REQUESTS", "to": "GITHUB_GET_A_PULL_REQUEST", "label": "pull_number" },
+    { "from": "GITHUB_LIST_MILESTONES", "to": "GITHUB_UPDATE_A_MILESTONE", "label": "milestone_number" },
+    { "from": "GITHUB_LIST_REPOSITORY_INVITATIONS", "to": "GITHUB_ACCEPT_A_REPOSITORY_INVITATION", "label": "invitation_id" },
+    { "from": "GITHUB_LIST_PULL_REQUESTS", "to": "GITHUB_GET_A_BRANCH", "label": "branch" },
+    { "from": "GITHUB_LIST_BRANCHES", "to": "GITHUB_GET_A_BRANCH", "label": "branch" },
+    { "from": "GITHUB_LIST_BRANCHES", "to": "GITHUB_CREATE_A_COMMIT_COMMENT", "label": "commit_sha" },
+    { "from": "GITHUB_LIST_COMMITS", "to": "GITHUB_CREATE_A_COMMIT_COMMENT", "label": "commit_sha" }
+  ]
+}

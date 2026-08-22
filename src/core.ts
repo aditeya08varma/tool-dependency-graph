@@ -103,8 +103,14 @@ const IDENTIFIER_SHAPE = /(^|_)(id|number|sha|slug|ref|key|token)$/i;
 
 // Any input required by more than this fraction of the catalog's tools is
 // ambient context (the caller already has it), not a scarce lookup result.
-// No toolkit vocabulary is named here -- it's a frequency signal.
-const AMBIENT_FREQUENCY_THRESHOLD = 0.05;
+// No toolkit vocabulary is named here -- it's a frequency signal. 5% was
+// calibrated against a large (893-tool) catalog, where ambient params like
+// owner/repo sit at ~49% -- but on a mid-sized catalog, 5% can be as few as
+// 2-3 tools, which wrongly flags a real entity ID shared by a handful of
+// related tools (e.g. gist_id across 4 gist endpoints) as ambient. 15% still
+// leaves a wide margin below genuinely ambient params while no longer
+// catching legitimately-scarce ones on smaller catalogs.
+const AMBIENT_FREQUENCY_THRESHOLD = 0.15;
 
 function compoundCandidates(field: FieldRef): string[] {
   const f = field.fieldName.toLowerCase();

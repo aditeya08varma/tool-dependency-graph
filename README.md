@@ -46,6 +46,22 @@ Matching is purely lexical and structural; it has no semantic understanding of w
 
 The underlying cause: RPC-style catalogs conventionally name a tool's own top-level response wrapper `<VerbNoun>Response`, which leaks the tool's own action name into context the same way a genuinely reused entity type (`Issue`, `PullRequest`, `User`) would — but a wrapper referenced from exactly one place isn't the same kind of signal as a type reused across many tools. A cleaner fix (weight context by how many places a type is `$ref`'d from) was considered and rejected here: at small catalog scale it broke a different, correct match (`Invitation`, which only happens to appear once in this demo catalog). Fixing this properly needs either a larger catalog to make the reuse-count signal reliable, or a small second pass that specifically discounts a tool's own top-level wrapper type. Left as an open, documented gap rather than patched with something fragile.
 
+## How do you know it's actually right?
+
+Edge count alone doesn't tell you that — a graph can look plausible and still be mostly wrong, or mostly right but missing things, and you can't tell which just by eyeballing it. `src/score.ts` answers this properly: it compares the generator's actual output against a **hand-derived ground truth** — every producer/consumer relationship worked out independently by reading each tool's schema, not by looking at what the tool already found — and reports real precision, recall, and F1.
+
+```bash
+npm run score -- catalogs/github.json tests/ground_truth.github.json
+npm run score -- catalogs/github_extended.json tests/ground_truth.github_extended.json
+```
+
+| Catalog | Precision | Recall | F1 |
+|---|---|---|---|
+| GitHub (16 tools) | 0.857 | 0.923 | 0.889 |
+| GitHub extended (42 tools) | 0.556 | 0.902 | 0.688 |
+
+This is also how a real, previously-invisible bug got caught: the ambient-frequency threshold (originally 5%, calibrated against a much larger 893-tool catalog) was silently discarding real dependencies on the 42-tool catalog, because a genuinely scarce ID shared by 3-4 related tools (e.g. `gist_id` across gist endpoints) is >5% of only 42 tools. Recall on that catalog was 34% before raising the threshold to 15%, and 90% after — a one-line fix that ground-truth scoring caught and casual inspection of edge counts never would have. See `tests/ground_truth.*.json` for the full hand-worked reasoning behind every expected edge, including the two cases (`username`/`login`, `hook_id`/`Webhook`) deliberately left as known misses to document exactly where the tokenizer's limits are.
+
 ## How the matching logic actually performs
 
 `npm run metrics -- catalogs/<name>.json` classifies every required input in a catalog into one of three buckets, instead of just reporting a raw edge count:

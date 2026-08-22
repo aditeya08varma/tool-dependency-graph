@@ -1,0 +1,80 @@
+{
+  "_comment": "Hand-derived ground truth for catalogs/github_extended.json, worked out independently of generate()'s actual output by reading every tool's required inputs and output schema by hand.",
+  "edges": [
+    { "from": "GITHUB_LIST_RELEASES", "to": "GITHUB_GET_A_RELEASE", "label": "release_id" },
+    { "from": "GITHUB_CREATE_A_RELEASE", "to": "GITHUB_GET_A_RELEASE", "label": "release_id" },
+    { "from": "GITHUB_LIST_RELEASES", "to": "GITHUB_DELETE_A_RELEASE", "label": "release_id" },
+    { "from": "GITHUB_GET_A_RELEASE", "to": "GITHUB_DELETE_A_RELEASE", "label": "release_id" },
+    { "from": "GITHUB_CREATE_A_RELEASE", "to": "GITHUB_DELETE_A_RELEASE", "label": "release_id" },
+    { "from": "GITHUB_LIST_RELEASES", "to": "GITHUB_LIST_RELEASE_ASSETS", "label": "release_id" },
+    { "from": "GITHUB_GET_A_RELEASE", "to": "GITHUB_LIST_RELEASE_ASSETS", "label": "release_id" },
+    { "from": "GITHUB_CREATE_A_RELEASE", "to": "GITHUB_LIST_RELEASE_ASSETS", "label": "release_id" },
+
+    { "from": "GITHUB_LIST_RELEASES", "to": "GITHUB_GET_A_RELEASE_ASSET", "label": "asset_id" },
+    { "from": "GITHUB_GET_A_RELEASE", "to": "GITHUB_GET_A_RELEASE_ASSET", "label": "asset_id" },
+    { "from": "GITHUB_LIST_RELEASE_ASSETS", "to": "GITHUB_GET_A_RELEASE_ASSET", "label": "asset_id" },
+    { "from": "GITHUB_LIST_RELEASES", "to": "GITHUB_DELETE_A_RELEASE_ASSET", "label": "asset_id" },
+    { "from": "GITHUB_GET_A_RELEASE", "to": "GITHUB_DELETE_A_RELEASE_ASSET", "label": "asset_id" },
+    { "from": "GITHUB_LIST_RELEASE_ASSETS", "to": "GITHUB_DELETE_A_RELEASE_ASSET", "label": "asset_id" },
+    { "from": "GITHUB_GET_A_RELEASE_ASSET", "to": "GITHUB_DELETE_A_RELEASE_ASSET", "label": "asset_id" },
+
+    { "from": "GITHUB_LIST_REPOSITORY_WORKFLOWS", "to": "GITHUB_GET_A_WORKFLOW", "label": "workflow_id" },
+    { "from": "GITHUB_LIST_REPOSITORY_WORKFLOWS", "to": "GITHUB_LIST_WORKFLOW_RUNS", "label": "workflow_id" },
+    { "from": "GITHUB_GET_A_WORKFLOW", "to": "GITHUB_LIST_WORKFLOW_RUNS", "label": "workflow_id" },
+
+    { "from": "GITHUB_LIST_WORKFLOW_RUNS", "to": "GITHUB_GET_A_WORKFLOW_RUN", "label": "run_id" },
+    { "from": "GITHUB_LIST_WORKFLOW_RUNS", "to": "GITHUB_CANCEL_A_WORKFLOW_RUN", "label": "run_id" },
+    { "from": "GITHUB_GET_A_WORKFLOW_RUN", "to": "GITHUB_CANCEL_A_WORKFLOW_RUN", "label": "run_id" },
+    { "from": "GITHUB_LIST_WORKFLOW_RUNS", "to": "GITHUB_LIST_WORKFLOW_RUN_ARTIFACTS", "label": "run_id" },
+    { "from": "GITHUB_GET_A_WORKFLOW_RUN", "to": "GITHUB_LIST_WORKFLOW_RUN_ARTIFACTS", "label": "run_id" },
+
+    { "from": "GITHUB_LIST_WORKFLOW_RUN_ARTIFACTS", "to": "GITHUB_DOWNLOAD_AN_ARTIFACT", "label": "artifact_id" },
+    { "from": "GITHUB_LIST_WORKFLOW_RUN_ARTIFACTS", "to": "GITHUB_DELETE_AN_ARTIFACT", "label": "artifact_id" },
+
+    { "from": "GITHUB_LIST_GISTS_FOR_THE_AUTHENTICATED_USER", "to": "GITHUB_GET_A_GIST", "label": "gist_id" },
+    { "from": "GITHUB_CREATE_A_GIST", "to": "GITHUB_GET_A_GIST", "label": "gist_id" },
+    { "from": "GITHUB_LIST_GISTS_FOR_THE_AUTHENTICATED_USER", "to": "GITHUB_DELETE_A_GIST", "label": "gist_id" },
+    { "from": "GITHUB_GET_A_GIST", "to": "GITHUB_DELETE_A_GIST", "label": "gist_id" },
+    { "from": "GITHUB_CREATE_A_GIST", "to": "GITHUB_DELETE_A_GIST", "label": "gist_id" },
+    { "from": "GITHUB_LIST_GISTS_FOR_THE_AUTHENTICATED_USER", "to": "GITHUB_LIST_GIST_COMMENTS", "label": "gist_id" },
+    { "from": "GITHUB_GET_A_GIST", "to": "GITHUB_LIST_GIST_COMMENTS", "label": "gist_id" },
+    { "from": "GITHUB_CREATE_A_GIST", "to": "GITHUB_LIST_GIST_COMMENTS", "label": "gist_id" },
+    { "from": "GITHUB_LIST_GISTS_FOR_THE_AUTHENTICATED_USER", "to": "GITHUB_UPDATE_A_GIST_COMMENT", "label": "gist_id" },
+    { "from": "GITHUB_GET_A_GIST", "to": "GITHUB_UPDATE_A_GIST_COMMENT", "label": "gist_id" },
+    { "from": "GITHUB_CREATE_A_GIST", "to": "GITHUB_UPDATE_A_GIST_COMMENT", "label": "gist_id" },
+
+    { "from": "GITHUB_LIST_GIST_COMMENTS", "to": "GITHUB_UPDATE_A_GIST_COMMENT", "label": "comment_id" },
+
+    { "from": "GITHUB_LIST_TEAMS", "to": "GITHUB_GET_A_TEAM_BY_NAME", "label": "team_slug" },
+    { "from": "GITHUB_LIST_TEAMS", "to": "GITHUB_LIST_TEAM_MEMBERS_IN_ORG", "label": "team_slug" },
+    { "from": "GITHUB_GET_A_TEAM_BY_NAME", "to": "GITHUB_LIST_TEAM_MEMBERS_IN_ORG", "label": "team_slug" },
+    { "from": "GITHUB_LIST_TEAMS", "to": "GITHUB_ADD_OR_UPDATE_TEAM_MEMBERSHIP", "label": "team_slug" },
+    { "from": "GITHUB_GET_A_TEAM_BY_NAME", "to": "GITHUB_ADD_OR_UPDATE_TEAM_MEMBERSHIP", "label": "team_slug" },
+
+    { "from": "GITHUB_LIST_TEAM_MEMBERS_IN_ORG", "to": "GITHUB_ADD_OR_UPDATE_TEAM_MEMBERSHIP", "label": "username", "_note": "User.login is the same concept as 'username' but the tokenizer won't credit it -- expected miss" },
+
+    { "from": "GITHUB_LIST_REPOSITORY_PROJECTS", "to": "GITHUB_GET_A_PROJECT", "label": "project_id" },
+    { "from": "GITHUB_LIST_REPOSITORY_PROJECTS", "to": "GITHUB_LIST_PROJECT_COLUMNS", "label": "project_id" },
+    { "from": "GITHUB_GET_A_PROJECT", "to": "GITHUB_LIST_PROJECT_COLUMNS", "label": "project_id" },
+
+    { "from": "GITHUB_LIST_PROJECT_COLUMNS", "to": "GITHUB_CREATE_A_PROJECT_CARD", "label": "column_id" },
+
+    { "from": "GITHUB_LIST_DEPLOYMENTS", "to": "GITHUB_GET_A_DEPLOYMENT", "label": "deployment_id" },
+    { "from": "GITHUB_LIST_DEPLOYMENTS", "to": "GITHUB_CREATE_A_DEPLOYMENT_STATUS", "label": "deployment_id" },
+    { "from": "GITHUB_GET_A_DEPLOYMENT", "to": "GITHUB_CREATE_A_DEPLOYMENT_STATUS", "label": "deployment_id" },
+    { "from": "GITHUB_LIST_DEPLOYMENTS", "to": "GITHUB_LIST_DEPLOYMENT_STATUSES", "label": "deployment_id" },
+    { "from": "GITHUB_GET_A_DEPLOYMENT", "to": "GITHUB_LIST_DEPLOYMENT_STATUSES", "label": "deployment_id" },
+
+    { "from": "GITHUB_LIST_CHECK_RUNS_FOR_A_REF", "to": "GITHUB_GET_A_CHECK_RUN", "label": "check_run_id" },
+    { "from": "GITHUB_LIST_CHECK_RUNS_FOR_A_REF", "to": "GITHUB_UPDATE_A_CHECK_RUN", "label": "check_run_id" },
+    { "from": "GITHUB_GET_A_CHECK_RUN", "to": "GITHUB_UPDATE_A_CHECK_RUN", "label": "check_run_id" },
+
+    { "from": "GITHUB_LIST_CHECK_SUITES_FOR_A_REF", "to": "GITHUB_GET_A_CHECK_SUITE", "label": "check_suite_id" },
+
+    { "from": "GITHUB_LIST_REPOSITORY_WEBHOOKS", "to": "GITHUB_GET_A_REPOSITORY_WEBHOOK", "label": "hook_id", "_note": "Webhook vs 'hook_id' don't share a token, only a substring -- expected miss" },
+    { "from": "GITHUB_LIST_REPOSITORY_WEBHOOKS", "to": "GITHUB_DELETE_A_REPOSITORY_WEBHOOK", "label": "hook_id", "_note": "expected miss, same reason" },
+    { "from": "GITHUB_GET_A_REPOSITORY_WEBHOOK", "to": "GITHUB_DELETE_A_REPOSITORY_WEBHOOK", "label": "hook_id", "_note": "expected miss, same reason" },
+    { "from": "GITHUB_LIST_REPOSITORY_WEBHOOKS", "to": "GITHUB_PING_A_REPOSITORY_WEBHOOK", "label": "hook_id", "_note": "expected miss, same reason" },
+    { "from": "GITHUB_GET_A_REPOSITORY_WEBHOOK", "to": "GITHUB_PING_A_REPOSITORY_WEBHOOK", "label": "hook_id", "_note": "expected miss, same reason" }
+  ]
+}

@@ -33735,7 +33735,7 @@ input.vis-configuration.vis-config-range:focus::-ms-fill-upper {
     return collected;
   }
   var IDENTIFIER_SHAPE = /(^|_)(id|number|sha|slug|ref|key|token)$/i;
-  var AMBIENT_FREQUENCY_THRESHOLD = 0.05;
+  var AMBIENT_FREQUENCY_THRESHOLD = 0.15;
   function compoundCandidates(field) {
     const f = field.fieldName.toLowerCase();
     return field.contextTokens.map((t) => `${t}_${f}`);
