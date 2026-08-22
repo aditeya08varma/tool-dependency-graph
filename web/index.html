@@ -1,0 +1,1161 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Tool Dependency Graph</title>
+<script src="https://unpkg.com/vis-network@9/standalone/umd/vis-network.min.js"></script>
+<script src="core.bundle.js"></script>
+<style>
+  :root {
+    --bg: #14171C; --surface: #1B1F26; --surface-2: #232833;
+    --ink: #E7E7E2; --ink-soft: #9BA1AC; --line: #2A2F38;
+    --accent: #E0A752; --good: #7FB08F; --bad: #d9736a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: grid; grid-template-columns: 380px 1fr; height: 100vh;
+  }
+  aside {
+    padding: 1.5rem; border-right: 1px solid var(--line); overflow-y: auto;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  h1 { font-size: 1.2rem; margin: 0; }
+  p.lede { color: var(--ink-soft); font-size: 0.85rem; margin: 0; line-height: 1.5; }
+  textarea {
+    width: 100%; min-height: 220px; background: var(--surface-2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 6px; padding: 0.6rem;
+    font-family: ui-monospace, monospace; font-size: 0.78rem; resize: vertical;
+  }
+  .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  button {
+    background: var(--surface-2); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 6px; padding: 0.5rem 0.9rem; font-size: 0.85rem; cursor: pointer;
+  }
+  button.primary { background: var(--accent); color: #1B1F26; border: none; font-weight: 600; }
+  button:hover { filter: brightness(1.1); }
+  input[type="file"] { color: var(--ink-soft); font-size: 0.8rem; }
+  #error { color: var(--bad); font-size: 0.82rem; white-space: pre-wrap; }
+  #stats { font-size: 0.82rem; color: var(--ink-soft); }
+  #stats b { color: var(--ink); }
+  #graph { position: relative; }
+  #network { width: 100%; height: 100%; }
+  .placeholder {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--ink-soft); font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+  <aside>
+    <h1>Tool Dependency Graph</h1>
+    <p class="lede">Paste or upload a tool catalog (Composio-style: slug, inputParameters, outputParameters with $ref/$defs) and this infers a producer &rarr; consumer dependency graph &mdash; entirely in your browser, nothing uploaded anywhere.</p>
+    <div class="row">
+      <button id="loadGithub">Load GitHub example</button>
+      <button id="loadSlack">Load Slack example</button>
+    </div>
+    <textarea id="input" placeholder="Paste catalog JSON here, or load an example above"></textarea>
+    <input type="file" id="file" accept="application/json">
+    <button class="primary" id="run">Generate graph</button>
+    <div id="error"></div>
+    <div id="stats"></div>
+  </aside>
+  <div id="graph">
+    <div class="placeholder" id="placeholder">Load a catalog and click "Generate graph"</div>
+    <div id="network"></div>
+  </div>
+
+<script>
+  const EXAMPLE_GITHUB = [
+  {
+    "slug": "GITHUB_LIST_REPOSITORY_ISSUES",
+    "name": "List repository issues",
+    "description": "Lists issues in a repository. Note: GitHub's REST API considers every pull request an issue.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string", "description": "Repository owner's username." },
+        "repo": { "type": "string", "description": "Repository name." },
+        "state": { "type": "string", "enum": ["open", "closed", "all"] }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListRepositoryIssuesResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListRepositoryIssuesResponse": {
+          "type": "object",
+          "properties": {
+            "issues": { "type": "array", "items": { "$ref": "#/$defs/Issue" } }
+          }
+        },
+        "Issue": {
+          "type": "object",
+          "title": "Issue",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer", "description": "Issue number within the repository." },
+            "title": { "type": "string" },
+            "state": { "type": "string" },
+            "user": { "$ref": "#/$defs/User" }
+          },
+          "required": ["id", "number", "state"]
+        },
+        "User": {
+          "type": "object",
+          "title": "User",
+          "properties": {
+            "id": { "type": "integer" },
+            "login": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Issues", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_AN_ISSUE",
+    "name": "Create an issue",
+    "description": "Opens a new issue in a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" }
+      },
+      "required": ["owner", "repo", "title"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Issue" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Issue": {
+          "type": "object",
+          "title": "Issue",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer", "description": "Issue number within the repository." },
+            "html_url": { "type": "string" }
+          },
+          "required": ["id", "number"]
+        }
+      }
+    },
+    "tags": ["Issues", "createHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_AN_ISSUE_COMMENT",
+    "name": "Create an issue comment",
+    "description": "Adds a comment to an existing issue or pull request.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "issue_number": { "type": "integer", "description": "The number that identifies the issue." },
+        "body": { "type": "string" }
+      },
+      "required": ["owner", "repo", "issue_number", "body"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/CreateAnIssueCommentResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "CreateAnIssueCommentResponse": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "integer" },
+            "body": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Comments", "createHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_ADD_LABELS_TO_AN_ISSUE",
+    "name": "Add labels to an issue",
+    "description": "Adds labels to an issue.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "issue_number": { "type": "integer", "description": "The number that identifies the issue." },
+        "labels": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["owner", "repo", "issue_number", "labels"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/LabelListResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "LabelListResponse": {
+          "type": "object",
+          "properties": {
+            "labels": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" } } } }
+          }
+        }
+      }
+    },
+    "tags": ["Issues", "updateHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_PULL_REQUESTS",
+    "name": "List pull requests",
+    "description": "Lists pull requests in a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "state": { "type": "string", "enum": ["open", "closed", "all"] }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListPullRequestsResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListPullRequestsResponse": {
+          "type": "object",
+          "properties": {
+            "pull_requests": { "type": "array", "items": { "$ref": "#/$defs/PullRequest" } }
+          }
+        },
+        "PullRequest": {
+          "type": "object",
+          "title": "PullRequest",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer", "description": "Pull request number within the repository." },
+            "state": { "type": "string" },
+            "head": { "$ref": "#/$defs/BranchRef" }
+          },
+          "required": ["id", "number", "state"]
+        },
+        "BranchRef": {
+          "type": "object",
+          "title": "BranchRef",
+          "properties": {
+            "ref": { "type": "string" },
+            "sha": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["pulls", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_MERGE_A_PULL_REQUEST",
+    "name": "Merge a pull request",
+    "description": "Merges an open, mergeable pull request.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "pull_number": { "type": "integer", "description": "The number that identifies the pull request." },
+        "merge_method": { "type": "string", "enum": ["merge", "squash", "rebase"] }
+      },
+      "required": ["owner", "repo", "pull_number"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/MergeAPullRequestResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "MergeAPullRequestResponse": {
+          "type": "object",
+          "properties": {
+            "sha": { "type": "string" },
+            "merged": { "type": "boolean" },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["pulls", "updateHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_PULL_REQUEST",
+    "name": "Get a pull request",
+    "description": "Retrieves details of a pull request.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "pull_number": { "type": "integer", "description": "The number that identifies the pull request." }
+      },
+      "required": ["owner", "repo", "pull_number"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/PullRequest" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "PullRequest": {
+          "type": "object",
+          "title": "PullRequest",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer" },
+            "mergeable": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "tags": ["pulls", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_MILESTONES",
+    "name": "List milestones",
+    "description": "Lists milestones for a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListMilestonesResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListMilestonesResponse": {
+          "type": "object",
+          "properties": {
+            "milestones": { "type": "array", "items": { "$ref": "#/$defs/Milestone" } }
+          }
+        },
+        "Milestone": {
+          "type": "object",
+          "title": "Milestone",
+          "properties": {
+            "id": { "type": "integer" },
+            "number": { "type": "integer", "description": "Milestone number within the repository." },
+            "title": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Issues", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_UPDATE_A_MILESTONE",
+    "name": "Update a milestone",
+    "description": "Updates a milestone.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "milestone_number": { "type": "integer", "description": "The number that identifies the milestone." },
+        "state": { "type": "string" }
+      },
+      "required": ["owner", "repo", "milestone_number"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Milestone" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Milestone": {
+          "type": "object",
+          "title": "Milestone",
+          "properties": { "id": { "type": "integer" }, "number": { "type": "integer" } }
+        }
+      }
+    },
+    "tags": ["Issues", "updateHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_REPOSITORY",
+    "name": "Get a repository",
+    "description": "Retrieves a repository by owner and name.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Repository" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Repository": {
+          "type": "object",
+          "title": "Repository",
+          "properties": {
+            "id": { "type": "integer", "description": "Unique identifier of the repository." },
+            "full_name": { "type": "string" },
+            "default_branch": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Repositories", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_REPOSITORY_INVITATIONS",
+    "name": "List repository invitations",
+    "description": "Lists pending invitations for a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListRepositoryInvitationsResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListRepositoryInvitationsResponse": {
+          "type": "object",
+          "properties": {
+            "invitations": { "type": "array", "items": { "$ref": "#/$defs/Invitation" } }
+          }
+        },
+        "Invitation": {
+          "type": "object",
+          "title": "Invitation",
+          "properties": { "id": { "type": "integer", "description": "Unique identifier of the invitation." } }
+        }
+      }
+    },
+    "tags": ["Invitations", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_ACCEPT_A_REPOSITORY_INVITATION",
+    "name": "Accept a repository invitation",
+    "description": "Accepts a repository invitation for the authenticated user.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "invitation_id": { "type": "integer", "description": "The unique identifier of the invitation." }
+      },
+      "required": ["invitation_id"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "type": "object" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Invitations", "updateHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_BRANCHES",
+    "name": "List branches",
+    "description": "Lists branches for a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListBranchesResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListBranchesResponse": {
+          "type": "object",
+          "properties": {
+            "branches": { "type": "array", "items": { "$ref": "#/$defs/Branch" } }
+          }
+        },
+        "Branch": {
+          "type": "object",
+          "title": "Branch",
+          "properties": {
+            "name": { "type": "string", "description": "The branch's name." },
+            "commit": { "$ref": "#/$defs/CommitRef" }
+          }
+        },
+        "CommitRef": {
+          "type": "object",
+          "title": "CommitRef",
+          "properties": { "sha": { "type": "string" } }
+        }
+      }
+    },
+    "tags": ["Repositories", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_GET_A_BRANCH",
+    "name": "Get a branch",
+    "description": "Retrieves details of a single branch.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "branch": { "type": "string", "description": "The branch's name." }
+      },
+      "required": ["owner", "repo", "branch"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Branch" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Branch": {
+          "type": "object",
+          "title": "Branch",
+          "properties": { "name": { "type": "string" }, "protected": { "type": "boolean" } }
+        }
+      }
+    },
+    "tags": ["Repositories", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_LIST_COMMITS",
+    "name": "List commits",
+    "description": "Lists commits on a repository.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" }
+      },
+      "required": ["owner", "repo"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListCommitsResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListCommitsResponse": {
+          "type": "object",
+          "properties": {
+            "commits": { "type": "array", "items": { "$ref": "#/$defs/Commit" } }
+          }
+        },
+        "Commit": {
+          "type": "object",
+          "title": "Commit",
+          "properties": {
+            "sha": { "type": "string", "description": "The SHA of the commit." },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Commits", "readOnlyHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  },
+  {
+    "slug": "GITHUB_CREATE_A_COMMIT_COMMENT",
+    "name": "Create a commit comment",
+    "description": "Creates a comment on a commit.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "commit_sha": { "type": "string", "description": "The SHA of the commit." },
+        "body": { "type": "string" }
+      },
+      "required": ["owner", "repo", "commit_sha", "body"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "type": "object", "properties": { "id": { "type": "integer" } } },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Commits", "createHint"],
+    "toolkit": { "slug": "github", "name": "github" }
+  }
+]
+;
+  const EXAMPLE_SLACK = [
+  {
+    "slug": "SLACK_LIST_CONVERSATIONS",
+    "name": "List conversations",
+    "description": "Lists channels in a Slack workspace.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "limit": { "type": "integer" },
+        "types": { "type": "string" }
+      },
+      "required": []
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListConversationsResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListConversationsResponse": {
+          "type": "object",
+          "properties": {
+            "channels": { "type": "array", "items": { "$ref": "#/$defs/Channel" } }
+          }
+        },
+        "Channel": {
+          "type": "object",
+          "title": "Channel",
+          "properties": {
+            "id": { "type": "string", "description": "The channel's unique ID, e.g. C0G9QF9GZ." },
+            "name": { "type": "string" },
+            "is_private": { "type": "boolean" }
+          },
+          "required": ["id", "name"]
+        }
+      }
+    },
+    "tags": ["Conversations", "readOnlyHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_CREATE_CHANNEL",
+    "name": "Create a channel",
+    "description": "Creates a new channel.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the channel to create." },
+        "is_private": { "type": "boolean" }
+      },
+      "required": ["name"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Channel" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Channel": {
+          "type": "object",
+          "title": "Channel",
+          "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+        }
+      }
+    },
+    "tags": ["Conversations", "createHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_GET_CONVERSATION_HISTORY",
+    "name": "Get conversation history",
+    "description": "Fetches messages from a channel.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string", "description": "The ID of the channel to fetch history for." },
+        "limit": { "type": "integer" }
+      },
+      "required": ["channel"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/HistoryResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "HistoryResponse": {
+          "type": "object",
+          "properties": {
+            "messages": { "type": "array", "items": { "$ref": "#/$defs/Message" } }
+          }
+        },
+        "Message": {
+          "type": "object",
+          "title": "Message",
+          "properties": {
+            "ts": { "type": "string", "description": "Timestamp identifying the message." },
+            "text": { "type": "string" },
+            "user": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Conversations", "readOnlyHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_POST_MESSAGE",
+    "name": "Post a message",
+    "description": "Sends a message to a channel.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string", "description": "The channel ID to post to." },
+        "text": { "type": "string" }
+      },
+      "required": ["channel", "text"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/PostMessageResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "PostMessageResponse": {
+          "type": "object",
+          "properties": {
+            "ts": { "type": "string", "description": "Timestamp of the posted message." },
+            "channel": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tags": ["Messages", "createHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_UPDATE_MESSAGE",
+    "name": "Update a message",
+    "description": "Edits an existing message.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string" },
+        "ts": { "type": "string", "description": "Timestamp of the message to edit." },
+        "text": { "type": "string" }
+      },
+      "required": ["channel", "ts", "text"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "type": "object", "properties": { "ts": { "type": "string" } } },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Messages", "updateHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_ADD_REACTION",
+    "name": "Add a reaction",
+    "description": "Adds an emoji reaction to a message.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string" },
+        "timestamp": { "type": "string", "description": "Timestamp of the message to react to." },
+        "name": { "type": "string", "description": "Emoji name." }
+      },
+      "required": ["channel", "timestamp", "name"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "type": "object" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Messages", "createHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_LIST_USERS",
+    "name": "List users",
+    "description": "Lists all users in the workspace.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "limit": { "type": "integer" } },
+      "required": []
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/ListUsersResponse" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "ListUsersResponse": {
+          "type": "object",
+          "properties": {
+            "members": { "type": "array", "items": { "$ref": "#/$defs/User" } }
+          }
+        },
+        "User": {
+          "type": "object",
+          "title": "User",
+          "properties": {
+            "id": { "type": "string", "description": "The user's unique ID, e.g. U012AB3CD." },
+            "name": { "type": "string" },
+            "real_name": { "type": "string" }
+          },
+          "required": ["id", "name"]
+        }
+      }
+    },
+    "tags": ["Users", "readOnlyHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_LOOKUP_USER_BY_EMAIL",
+    "name": "Look up user by email",
+    "description": "Finds a user by their email address.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "email": { "type": "string" } },
+      "required": ["email"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/User" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "User": {
+          "type": "object",
+          "title": "User",
+          "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+        }
+      }
+    },
+    "tags": ["Users", "readOnlyHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_GET_USER_INFO",
+    "name": "Get user info",
+    "description": "Retrieves profile information for a user.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "user": { "type": "string", "description": "The user's ID." }
+      },
+      "required": ["user"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/UserProfile" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "UserProfile": {
+          "type": "object",
+          "properties": { "id": { "type": "string" }, "tz": { "type": "string" } }
+        }
+      }
+    },
+    "tags": ["Users", "readOnlyHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_INVITE_TO_CONVERSATION",
+    "name": "Invite users to a conversation",
+    "description": "Invites users to join a channel.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string", "description": "The channel ID to invite users to." },
+        "users": { "type": "string", "description": "Comma-separated user IDs." }
+      },
+      "required": ["channel", "users"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "$ref": "#/$defs/Channel" },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {
+        "Channel": { "type": "object", "title": "Channel", "properties": { "id": { "type": "string" } } }
+      }
+    },
+    "tags": ["Conversations", "updateHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_LIST_CONVERSATION_MEMBERS",
+    "name": "List conversation members",
+    "description": "Lists the members of a channel.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string" }
+      },
+      "required": ["channel"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": {
+        "data": { "type": "object", "properties": { "members": { "type": "array", "items": { "type": "string" } } } },
+        "error": { "type": "string" },
+        "successful": { "type": "boolean" }
+      },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Conversations", "readOnlyHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_PIN_MESSAGE",
+    "name": "Pin a message",
+    "description": "Pins a message to a channel.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string" },
+        "timestamp": { "type": "string", "description": "Timestamp of the message to pin." }
+      },
+      "required": ["channel", "timestamp"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Messages", "createHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_DELETE_MESSAGE",
+    "name": "Delete a message",
+    "description": "Deletes a message from a channel.",
+    "inputParameters": {
+      "type": "object",
+      "properties": {
+        "channel": { "type": "string" },
+        "ts": { "type": "string", "description": "Timestamp of the message to delete." }
+      },
+      "required": ["channel", "ts"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Messages", "destructiveHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  },
+  {
+    "slug": "SLACK_ARCHIVE_CONVERSATION",
+    "name": "Archive a conversation",
+    "description": "Archives a channel.",
+    "inputParameters": {
+      "type": "object",
+      "properties": { "channel": { "type": "string" } },
+      "required": ["channel"]
+    },
+    "outputParameters": {
+      "type": "object",
+      "properties": { "data": { "type": "object" }, "error": { "type": "string" }, "successful": { "type": "boolean" } },
+      "required": ["data", "successful"],
+      "$defs": {}
+    },
+    "tags": ["Conversations", "destructiveHint"],
+    "toolkit": { "slug": "slack", "name": "slack" }
+  }
+]
+;
+
+  const input = document.getElementById("input");
+  const errorBox = document.getElementById("error");
+  const statsBox = document.getElementById("stats");
+  const placeholder = document.getElementById("placeholder");
+
+  document.getElementById("loadGithub").onclick = () => { input.value = JSON.stringify(EXAMPLE_GITHUB, null, 2); };
+  document.getElementById("loadSlack").onclick = () => { input.value = JSON.stringify(EXAMPLE_SLACK, null, 2); };
+
+  document.getElementById("file").onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { input.value = reader.result; };
+    reader.readAsText(file);
+  };
+
+  let network = null;
+
+  document.getElementById("run").onclick = () => {
+    errorBox.textContent = "";
+    let tools;
+    try {
+      const parsed = JSON.parse(input.value);
+      tools = Array.isArray(parsed) ? parsed : (parsed.tools ?? parsed.items ?? []);
+      if (!Array.isArray(tools) || tools.length === 0) {
+        throw new Error("Expected a JSON array of tools (or {tools: [...]} / {items: [...]})");
+      }
+    } catch (err) {
+      errorBox.textContent = "Couldn't parse catalog: " + err.message;
+      return;
+    }
+
+    let graph;
+    try {
+      graph = DepGraph.generate(tools);
+    } catch (err) {
+      errorBox.textContent = "Generator error: " + err.message;
+      return;
+    }
+
+    const slugs = new Set(tools.map((t) => String(t.slug ?? t.name ?? "").toUpperCase()));
+    const provenance = graph.nodes.length
+      ? graph.nodes.filter((n) => slugs.has(n.id.toUpperCase())).length / graph.nodes.length
+      : 0;
+
+    statsBox.innerHTML =
+      "<b>" + graph.nodes.length + "</b> nodes &nbsp; <b>" + graph.edges.length + "</b> edges &nbsp; " +
+      "<b>" + (graph.nodes.length ? (graph.edges.length / graph.nodes.length).toFixed(2) : "0") + "</b> edges/node &nbsp; " +
+      "<b>" + provenance.toFixed(2) + "</b> provenance";
+
+    placeholder.style.display = "none";
+    const nodes = new vis.DataSet(graph.nodes.map((n) => ({
+      id: n.id, label: n.id.replace(/_/g, " "), group: n.service || "other"
+    })));
+    const edges = new vis.DataSet(graph.edges.map((e, i) => ({
+      id: i, from: e.from, to: e.to, label: e.label, arrows: "to",
+      font: { size: 10, color: "#9BA1AC" }
+    })));
+
+    if (network) network.destroy();
+    network = new vis.Network(document.getElementById("network"), { nodes, edges }, {
+      layout: { improvedLayout: false },
+      physics: {
+        solver: "forceAtlas2Based",
+        forceAtlas2Based: { gravitationalConstant: -120, springLength: 150 },
+        stabilization: { iterations: 200 },
+      },
+      edges: { smooth: false, color: { color: "#4a5568", opacity: 0.6 } },
+      nodes: { shape: "dot", size: 10, font: { color: "#e7e7e2", size: 12 },
+               borderWidth: 1, color: { border: "#2a2f38" } },
+    });
+    // Creating vis.Network inside a click handler (rather than at page load)
+    // computes node positions but doesn't paint an initial frame -- calling
+    // redraw()/fit() synchronously here does nothing, because the container
+    // hasn't had a browser paint cycle yet. Deferring to the next tick (after
+    // the browser lays out the now-visible container) is what actually works.
+    setTimeout(() => { network.redraw(); network.fit(); }, 0);
+  };
+</script>
+</body>
+</html>
