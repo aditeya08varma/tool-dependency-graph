@@ -10,10 +10,11 @@
     --accent: #E0A752; --good: #7FB08F; --bad: #d9736a;
   }
   * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
   body {
-    margin: 0; background: var(--bg); color: var(--ink);
+    background: var(--bg); color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    display: grid; grid-template-columns: 380px 1fr; height: 100vh;
+    display: grid; grid-template-columns: 380px 1fr; grid-template-rows: 100vh;
   }
   aside {
     padding: 1.5rem; border-right: 1px solid var(--line); overflow-y: auto;
@@ -37,8 +38,8 @@
   #error { color: var(--bad); font-size: 0.82rem; white-space: pre-wrap; }
   #stats { font-size: 0.82rem; color: var(--ink-soft); }
   #stats b { color: var(--ink); }
-  #graph { position: relative; }
-  #network { width: 100%; height: 100%; }
+  #graph { position: relative; height: 100vh; overflow: hidden; }
+  #network { position: absolute; inset: 0; }
   .placeholder {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     color: var(--ink-soft); font-size: 0.9rem;
