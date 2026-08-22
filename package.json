@@ -1,0 +1,18 @@
+{
+  "name": "tool-dependency-graph",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Infers producer/consumer dependency graphs between API tools from their JSON-schema catalogs, without hardcoding any toolkit's vocabulary.",
+  "scripts": {
+    "generate": "node --import tsx src/generate.ts",
+    "viz": "node --import tsx src/build_viz.ts",
+    "test": "node --import tsx tests/basic.test.ts",
+    "demo:github": "npm run generate -- catalogs/github.json --out dependency_graph.github.json && npm run viz -- dependency_graph.github.json visualization.github.html",
+    "demo:slack": "npm run generate -- catalogs/slack.json --out dependency_graph.slack.json && npm run viz -- dependency_graph.slack.json visualization.slack.html"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}
