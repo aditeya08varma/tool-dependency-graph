@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>dependency_graph.github.json — dependency graph</title>
+<script src="https://unpkg.com/vis-network@9/standalone/umd/vis-network.min.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; font-family: -apple-system, sans-serif; background: #0f1115; }
+  #graph { width: 100%; height: 100%; }
+  #stats { position: absolute; top: 12px; left: 12px; background: #1b1f26; color: #e7e7e2;
+           padding: 8px 14px; border-radius: 8px; font-size: 13px; z-index: 10; border: 1px solid #2a2f38; }
+</style>
+</head>
+<body>
+<div id="stats">16 nodes / 14 edges — dependency_graph.github.json</div>
+<div id="graph"></div>
+<script>
+  const data = {"nodes":[{"id":"GITHUB_LIST_REPOSITORY_ISSUES","service":"issues"},{"id":"GITHUB_CREATE_AN_ISSUE","service":"issues"},{"id":"GITHUB_CREATE_AN_ISSUE_COMMENT","service":"comments"},{"id":"GITHUB_ADD_LABELS_TO_AN_ISSUE","service":"issues"},{"id":"GITHUB_LIST_PULL_REQUESTS","service":"pulls"},{"id":"GITHUB_MERGE_A_PULL_REQUEST","service":"pulls"},{"id":"GITHUB_GET_A_PULL_REQUEST","service":"pulls"},{"id":"GITHUB_LIST_MILESTONES","service":"issues"},{"id":"GITHUB_UPDATE_A_MILESTONE","service":"issues"},{"id":"GITHUB_GET_A_REPOSITORY","service":"repositories"},{"id":"GITHUB_LIST_REPOSITORY_INVITATIONS","service":"invitations"},{"id":"GITHUB_ACCEPT_A_REPOSITORY_INVITATION","service":"invitations"},{"id":"GITHUB_LIST_BRANCHES","service":"repositories"},{"id":"GITHUB_GET_A_BRANCH","service":"repositories"},{"id":"GITHUB_LIST_COMMITS","service":"commits"},{"id":"GITHUB_CREATE_A_COMMIT_COMMENT","service":"commits"}],"edges":[{"from":"GITHUB_LIST_REPOSITORY_ISSUES","to":"GITHUB_CREATE_AN_ISSUE_COMMENT","label":"issue_number"},{"from":"GITHUB_CREATE_AN_ISSUE","to":"GITHUB_CREATE_AN_ISSUE_COMMENT","label":"issue_number"},{"from":"GITHUB_LIST_REPOSITORY_ISSUES","to":"GITHUB_ADD_LABELS_TO_AN_ISSUE","label":"issue_number"},{"from":"GITHUB_CREATE_AN_ISSUE","to":"GITHUB_ADD_LABELS_TO_AN_ISSUE","label":"issue_number"},{"from":"GITHUB_CREATE_AN_ISSUE_COMMENT","to":"GITHUB_ADD_LABELS_TO_AN_ISSUE","label":"issue_number"},{"from":"GITHUB_LIST_PULL_REQUESTS","to":"GITHUB_MERGE_A_PULL_REQUEST","label":"pull_number"},{"from":"GITHUB_GET_A_PULL_REQUEST","to":"GITHUB_MERGE_A_PULL_REQUEST","label":"pull_number"},{"from":"GITHUB_LIST_PULL_REQUESTS","to":"GITHUB_GET_A_PULL_REQUEST","label":"pull_number"},{"from":"GITHUB_MERGE_A_PULL_REQUEST","to":"GITHUB_GET_A_PULL_REQUEST","label":"pull_number"},{"from":"GITHUB_LIST_MILESTONES","to":"GITHUB_UPDATE_A_MILESTONE","label":"milestone_number"},{"from":"GITHUB_LIST_REPOSITORY_INVITATIONS","to":"GITHUB_ACCEPT_A_REPOSITORY_INVITATION","label":"invitation_id"},{"from":"GITHUB_LIST_PULL_REQUESTS","to":"GITHUB_GET_A_BRANCH","label":"branch"},{"from":"GITHUB_LIST_BRANCHES","to":"GITHUB_CREATE_A_COMMIT_COMMENT","label":"commit_sha"},{"from":"GITHUB_LIST_COMMITS","to":"GITHUB_CREATE_A_COMMIT_COMMENT","label":"commit_sha"}]};
+  const nodes = new vis.DataSet(data.nodes.map(n => ({
+    id: n.id, label: n.id.replace(/_/g, " "), group: n.service || "other"
+  })));
+  const edges = new vis.DataSet(data.edges.map((e, i) => ({
+    id: i, from: e.from, to: e.to, label: e.label, arrows: "to", font: { size: 10, color: "#9BA1AC" }
+  })));
+  new vis.Network(document.getElementById("graph"), { nodes, edges }, {
+    layout: { improvedLayout: false },
+    physics: {
+      solver: "forceAtlas2Based",
+      forceAtlas2Based: { gravitationalConstant: -120, springLength: 150 },
+      stabilization: { iterations: 200 },
+    },
+    edges: { smooth: false, color: { color: "#4a5568", opacity: 0.6 } },
+    nodes: { shape: "dot", size: 10, font: { color: "#e7e7e2", size: 12 },
+             borderWidth: 1, color: { border: "#2a2f38" } },
+  });
+</script>
+</body>
+</html>

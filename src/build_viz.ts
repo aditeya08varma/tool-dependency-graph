@@ -1,0 +1,57 @@
+/**
+ * Builds a self-contained HTML visualization (graph JSON embedded inline --
+ * no fetch, no CDN dependency beyond the vis-network script tag, so it opens
+ * directly from disk with no server needed).
+ *
+ * Usage: node --import tsx src/build_viz.ts dependency_graph.json out.html
+ */
+import { readFileSync, writeFileSync } from "fs";
+
+const [graphPath, outPath] = process.argv.slice(2);
+if (!graphPath || !outPath) {
+  throw new Error("usage: build_viz.ts <graph.json> <out.html>");
+}
+
+const graph = JSON.parse(readFileSync(graphPath, "utf-8"));
+
+const html = `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>${graphPath} — dependency graph</title>
+<script src="https://unpkg.com/vis-network@9/standalone/umd/vis-network.min.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; font-family: -apple-system, sans-serif; background: #0f1115; }
+  #graph { width: 100%; height: 100%; }
+  #stats { position: absolute; top: 12px; left: 12px; background: #1b1f26; color: #e7e7e2;
+           padding: 8px 14px; border-radius: 8px; font-size: 13px; z-index: 10; border: 1px solid #2a2f38; }
+</style>
+</head>
+<body>
+<div id="stats">${graph.nodes.length} nodes / ${graph.edges.length} edges — ${graphPath}</div>
+<div id="graph"></div>
+<script>
+  const data = ${JSON.stringify(graph)};
+  const nodes = new vis.DataSet(data.nodes.map(n => ({
+    id: n.id, label: n.id.replace(/_/g, " "), group: n.service || "other"
+  })));
+  const edges = new vis.DataSet(data.edges.map((e, i) => ({
+    id: i, from: e.from, to: e.to, label: e.label, arrows: "to", font: { size: 10, color: "#9BA1AC" }
+  })));
+  new vis.Network(document.getElementById("graph"), { nodes, edges }, {
+    layout: { improvedLayout: false },
+    physics: {
+      solver: "forceAtlas2Based",
+      forceAtlas2Based: { gravitationalConstant: -120, springLength: 150 },
+      stabilization: { iterations: 200 },
+    },
+    edges: { smooth: false, color: { color: "#4a5568", opacity: 0.6 } },
+    nodes: { shape: "dot", size: 10, font: { color: "#e7e7e2", size: 12 },
+             borderWidth: 1, color: { border: "#2a2f38" } },
+  });
+</script>
+</body>
+</html>`;
+
+writeFileSync(outPath, html, "utf-8");
+console.log(`wrote ${outPath}`);
