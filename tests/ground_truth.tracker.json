@@ -1,0 +1,1045 @@
+{
+  "_comment": "Hand-derived ground truth for catalogs/tracker.json (57-tool issue-tracker catalog). Only a type's own dedicated CRUD tools count as a true producer (e.g. user_id's producers are CREATE_USER/GET_USER/LIST_USERS) -- a tool that merely nests that type somewhere in its response tree (e.g. GET_ISSUE's nested assignee/reporter User objects) is NOT counted as a true producer here, by the same methodology used for github/slack/payments ground truth.",
+  "edges": [
+    {
+      "from": "TRK_CREATE_WORKSPACE",
+      "to": "TRK_GET_WORKSPACE",
+      "label": "workspace_id"
+    },
+    {
+      "from": "TRK_CREATE_WORKSPACE",
+      "to": "TRK_CREATE_TEAM",
+      "label": "workspace_id"
+    },
+    {
+      "from": "TRK_GET_WORKSPACE",
+      "to": "TRK_CREATE_TEAM",
+      "label": "workspace_id"
+    },
+    {
+      "from": "TRK_CREATE_WORKSPACE",
+      "to": "TRK_LIST_TEAMS",
+      "label": "workspace_id"
+    },
+    {
+      "from": "TRK_GET_WORKSPACE",
+      "to": "TRK_LIST_TEAMS",
+      "label": "workspace_id"
+    },
+    {
+      "from": "TRK_CREATE_TEAM",
+      "to": "TRK_ADD_TEAM_MEMBER",
+      "label": "team_id"
+    },
+    {
+      "from": "TRK_LIST_TEAMS",
+      "to": "TRK_ADD_TEAM_MEMBER",
+      "label": "team_id"
+    },
+    {
+      "from": "TRK_CREATE_USER",
+      "to": "TRK_ADD_TEAM_MEMBER",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_GET_USER",
+      "to": "TRK_ADD_TEAM_MEMBER",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_LIST_USERS",
+      "to": "TRK_ADD_TEAM_MEMBER",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_CREATE_USER",
+      "to": "TRK_GET_USER",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_LIST_USERS",
+      "to": "TRK_GET_USER",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_CREATE_WORKSPACE",
+      "to": "TRK_CREATE_PROJECT",
+      "label": "workspace_id"
+    },
+    {
+      "from": "TRK_GET_WORKSPACE",
+      "to": "TRK_CREATE_PROJECT",
+      "label": "workspace_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_GET_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_GET_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_GET_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_WORKSPACE",
+      "to": "TRK_LIST_PROJECTS",
+      "label": "workspace_id"
+    },
+    {
+      "from": "TRK_GET_WORKSPACE",
+      "to": "TRK_LIST_PROJECTS",
+      "label": "workspace_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_UPDATE_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_UPDATE_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_UPDATE_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_DELETE_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_DELETE_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_DELETE_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_DELETE_PROJECT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_CREATE_SPRINT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_CREATE_SPRINT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_CREATE_SPRINT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_CREATE_SPRINT",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_SPRINT",
+      "to": "TRK_GET_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_LIST_SPRINTS",
+      "to": "TRK_GET_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_LIST_SPRINTS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_LIST_SPRINTS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_LIST_SPRINTS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_LIST_SPRINTS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_SPRINT",
+      "to": "TRK_START_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_GET_SPRINT",
+      "to": "TRK_START_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_LIST_SPRINTS",
+      "to": "TRK_START_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_CREATE_SPRINT",
+      "to": "TRK_COMPLETE_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_GET_SPRINT",
+      "to": "TRK_COMPLETE_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_LIST_SPRINTS",
+      "to": "TRK_COMPLETE_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_CREATE_EPIC",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_CREATE_EPIC",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_CREATE_EPIC",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_CREATE_EPIC",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_EPIC",
+      "to": "TRK_GET_EPIC",
+      "label": "epic_id"
+    },
+    {
+      "from": "TRK_LIST_EPICS",
+      "to": "TRK_GET_EPIC",
+      "label": "epic_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_LIST_EPICS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_LIST_EPICS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_LIST_EPICS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_LIST_EPICS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_CREATE_LABEL",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_CREATE_LABEL",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_CREATE_LABEL",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_CREATE_LABEL",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_LIST_LABELS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_LIST_LABELS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_LIST_LABELS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_LIST_LABELS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_ADD_LABEL_TO_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_ADD_LABEL_TO_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_ADD_LABEL_TO_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_ADD_LABEL_TO_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_LABEL",
+      "to": "TRK_ADD_LABEL_TO_ISSUE",
+      "label": "label_id"
+    },
+    {
+      "from": "TRK_LIST_LABELS",
+      "to": "TRK_ADD_LABEL_TO_ISSUE",
+      "label": "label_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_REMOVE_LABEL_FROM_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_REMOVE_LABEL_FROM_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_REMOVE_LABEL_FROM_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_REMOVE_LABEL_FROM_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_LABEL",
+      "to": "TRK_REMOVE_LABEL_FROM_ISSUE",
+      "label": "label_id"
+    },
+    {
+      "from": "TRK_LIST_LABELS",
+      "to": "TRK_REMOVE_LABEL_FROM_ISSUE",
+      "label": "label_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_CREATE_MILESTONE",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_CREATE_MILESTONE",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_CREATE_MILESTONE",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_CREATE_MILESTONE",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_MILESTONE",
+      "to": "TRK_GET_MILESTONE",
+      "label": "milestone_id"
+    },
+    {
+      "from": "TRK_LIST_MILESTONES",
+      "to": "TRK_GET_MILESTONE",
+      "label": "milestone_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_LIST_MILESTONES",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_LIST_MILESTONES",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_LIST_MILESTONES",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_LIST_MILESTONES",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_CREATE_ISSUE",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_CREATE_ISSUE",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_CREATE_ISSUE",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_CREATE_ISSUE",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_USER",
+      "to": "TRK_CREATE_ISSUE",
+      "label": "reporter_id"
+    },
+    {
+      "from": "TRK_GET_USER",
+      "to": "TRK_CREATE_ISSUE",
+      "label": "reporter_id"
+    },
+    {
+      "from": "TRK_LIST_USERS",
+      "to": "TRK_CREATE_ISSUE",
+      "label": "reporter_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_GET_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_GET_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_GET_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_LIST_ISSUES",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_LIST_ISSUES",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_LIST_ISSUES",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_LIST_ISSUES",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_UPDATE_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_UPDATE_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_UPDATE_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_DELETE_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_DELETE_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_DELETE_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_DELETE_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_ASSIGN_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_ASSIGN_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_ASSIGN_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_ASSIGN_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_USER",
+      "to": "TRK_ASSIGN_ISSUE",
+      "label": "assignee_id"
+    },
+    {
+      "from": "TRK_GET_USER",
+      "to": "TRK_ASSIGN_ISSUE",
+      "label": "assignee_id"
+    },
+    {
+      "from": "TRK_LIST_USERS",
+      "to": "TRK_ASSIGN_ISSUE",
+      "label": "assignee_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_TRANSITION_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_TRANSITION_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_TRANSITION_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_TRANSITION_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_SET_ISSUE_PRIORITY",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_SET_ISSUE_PRIORITY",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_SET_ISSUE_PRIORITY",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_SET_ISSUE_PRIORITY",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_MOVE_ISSUE_TO_SPRINT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_MOVE_ISSUE_TO_SPRINT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_MOVE_ISSUE_TO_SPRINT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_MOVE_ISSUE_TO_SPRINT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_SPRINT",
+      "to": "TRK_MOVE_ISSUE_TO_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_GET_SPRINT",
+      "to": "TRK_MOVE_ISSUE_TO_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_LIST_SPRINTS",
+      "to": "TRK_MOVE_ISSUE_TO_SPRINT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_LINK_SUBTASK",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_LINK_SUBTASK",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_LINK_SUBTASK",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_LINK_SUBTASK",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_LINK_SUBTASK",
+      "label": "parent_issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_LINK_SUBTASK",
+      "label": "parent_issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_LINK_SUBTASK",
+      "label": "parent_issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_LINK_SUBTASK",
+      "label": "parent_issue_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_ADD_ISSUE_TO_EPIC",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_ADD_ISSUE_TO_EPIC",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_ADD_ISSUE_TO_EPIC",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_ADD_ISSUE_TO_EPIC",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_EPIC",
+      "to": "TRK_ADD_ISSUE_TO_EPIC",
+      "label": "epic_id"
+    },
+    {
+      "from": "TRK_GET_EPIC",
+      "to": "TRK_ADD_ISSUE_TO_EPIC",
+      "label": "epic_id"
+    },
+    {
+      "from": "TRK_LIST_EPICS",
+      "to": "TRK_ADD_ISSUE_TO_EPIC",
+      "label": "epic_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_CREATE_COMMENT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_CREATE_COMMENT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_CREATE_COMMENT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_CREATE_COMMENT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_USER",
+      "to": "TRK_CREATE_COMMENT",
+      "label": "author_id"
+    },
+    {
+      "from": "TRK_GET_USER",
+      "to": "TRK_CREATE_COMMENT",
+      "label": "author_id"
+    },
+    {
+      "from": "TRK_LIST_USERS",
+      "to": "TRK_CREATE_COMMENT",
+      "label": "author_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_LIST_COMMENTS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_LIST_COMMENTS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_LIST_COMMENTS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_LIST_COMMENTS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_COMMENT",
+      "to": "TRK_DELETE_COMMENT",
+      "label": "comment_id"
+    },
+    {
+      "from": "TRK_LIST_COMMENTS",
+      "to": "TRK_DELETE_COMMENT",
+      "label": "comment_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_CREATE_ATTACHMENT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_CREATE_ATTACHMENT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_CREATE_ATTACHMENT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_CREATE_ATTACHMENT",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_USER",
+      "to": "TRK_CREATE_ATTACHMENT",
+      "label": "uploaded_by"
+    },
+    {
+      "from": "TRK_GET_USER",
+      "to": "TRK_CREATE_ATTACHMENT",
+      "label": "uploaded_by"
+    },
+    {
+      "from": "TRK_LIST_USERS",
+      "to": "TRK_CREATE_ATTACHMENT",
+      "label": "uploaded_by"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_LIST_ATTACHMENTS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_LIST_ATTACHMENTS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_LIST_ATTACHMENTS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_LIST_ATTACHMENTS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_ATTACHMENT",
+      "to": "TRK_DELETE_ATTACHMENT",
+      "label": "attachment_id"
+    },
+    {
+      "from": "TRK_LIST_ATTACHMENTS",
+      "to": "TRK_DELETE_ATTACHMENT",
+      "label": "attachment_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_CREATE_BOARD",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_CREATE_BOARD",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_CREATE_BOARD",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_CREATE_BOARD",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_BOARD",
+      "to": "TRK_GET_BOARD",
+      "label": "board_id"
+    },
+    {
+      "from": "TRK_LIST_BOARDS",
+      "to": "TRK_GET_BOARD",
+      "label": "board_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_LIST_BOARDS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_LIST_BOARDS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_LIST_BOARDS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_LIST_BOARDS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_CREATE_WEBHOOK",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_CREATE_WEBHOOK",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_CREATE_WEBHOOK",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_CREATE_WEBHOOK",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_PROJECT",
+      "to": "TRK_LIST_WEBHOOKS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_GET_PROJECT",
+      "to": "TRK_LIST_WEBHOOKS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_LIST_PROJECTS",
+      "to": "TRK_LIST_WEBHOOKS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_UPDATE_PROJECT",
+      "to": "TRK_LIST_WEBHOOKS",
+      "label": "project_id"
+    },
+    {
+      "from": "TRK_CREATE_WEBHOOK",
+      "to": "TRK_DELETE_WEBHOOK",
+      "label": "webhook_id"
+    },
+    {
+      "from": "TRK_LIST_WEBHOOKS",
+      "to": "TRK_DELETE_WEBHOOK",
+      "label": "webhook_id"
+    },
+    {
+      "from": "TRK_CREATE_SPRINT",
+      "to": "TRK_CREATE_SPRINT_REVIEW_EVENT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_GET_SPRINT",
+      "to": "TRK_CREATE_SPRINT_REVIEW_EVENT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_LIST_SPRINTS",
+      "to": "TRK_CREATE_SPRINT_REVIEW_EVENT",
+      "label": "sprint_id"
+    },
+    {
+      "from": "TRK_CREATE_SPRINT_REVIEW_EVENT",
+      "to": "TRK_GET_EVENT",
+      "label": "event_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_WATCH_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_WATCH_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_WATCH_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_WATCH_ISSUE",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_USER",
+      "to": "TRK_WATCH_ISSUE",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_GET_USER",
+      "to": "TRK_WATCH_ISSUE",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_LIST_USERS",
+      "to": "TRK_WATCH_ISSUE",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_CREATE_ISSUE",
+      "to": "TRK_LIST_WATCHERS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_GET_ISSUE",
+      "to": "TRK_LIST_WATCHERS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_LIST_ISSUES",
+      "to": "TRK_LIST_WATCHERS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_UPDATE_ISSUE",
+      "to": "TRK_LIST_WATCHERS",
+      "label": "issue_id"
+    },
+    {
+      "from": "TRK_CREATE_COMMENT",
+      "to": "TRK_ADD_REACTION",
+      "label": "comment_id"
+    },
+    {
+      "from": "TRK_LIST_COMMENTS",
+      "to": "TRK_ADD_REACTION",
+      "label": "comment_id"
+    },
+    {
+      "from": "TRK_CREATE_USER",
+      "to": "TRK_ADD_REACTION",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_GET_USER",
+      "to": "TRK_ADD_REACTION",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_LIST_USERS",
+      "to": "TRK_ADD_REACTION",
+      "label": "user_id"
+    },
+    {
+      "from": "TRK_CREATE_COMMENT",
+      "to": "TRK_LIST_REACTIONS",
+      "label": "comment_id"
+    },
+    {
+      "from": "TRK_LIST_COMMENTS",
+      "to": "TRK_LIST_REACTIONS",
+      "label": "comment_id"
+    }
+  ]
+}

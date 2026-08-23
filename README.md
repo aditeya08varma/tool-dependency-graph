@@ -127,6 +127,23 @@ The fix (`src/core.ts`): only suppress a frequent param as ambient if it *also* 
 
 **One earlier, now-superseded finding, kept for the record:** the very first LLM-refined run (before the ambient fix landed) scored 0.929 / 0.551 / 0.691 — a precision-only illusion, since ~45 of its 53 false negatives were the exact `customer_id`/`cust_id`/`pm_id` edges the ambient bug made structurally unreachable by any LLM step. That run also caught a real, separate finding worth keeping: the fill-gap step came back genuinely empty (`{"found": []}`, verified via `llm_refine_debug.json` — not a caught error or quota fallback) for `cust_id`/`pm_id` even with an explicit "(legacy short form of customer_id)" hint in the param description — a synonym-resolution miss the Gemini-tested catalogs never surfaced, and one the later run above didn't reliably avoid either (it succeeded that time, but the mechanism is non-deterministic, not fixed).
 
+### A bigger, more deeply-nested catalog surfaces two new failure modes
+
+`catalogs/tracker.json` (57 tools, an issue-tracker domain — Workspace/Project/Sprint/Epic/Issue/Comment/Board/Webhook, etc. — with `tests/ground_truth.tracker.json`, 208 hand-derived edges) is deliberately bigger and more deeply nested than any prior catalog: `Board → BoardColumn → Issue → {reporter, assignee}: User` is four `$ref` levels deep, `Issue.parent_issue_id` is genuinely self-referential, and the same underlying entity (`User`) is needed under four different role names (`reporter_id`, `assignee_id`, `author_id`, `uploaded_by`) instead of payments.json's two.
+
+| | Precision | Recall | F1 |
+|---|---|---|---|
+| Deterministic | 0.695 | 0.942 | 0.800 |
+| LLM-refined | 0.627 | **0.986** | 0.766 |
+
+Recall is the best of any catalog tested. Precision *dropping* after LLM refinement is a first, and the reason is two new, distinct bugs this catalog was finally complex enough to expose — neither is the ambient-threshold issue above; both are new.
+
+**1. Nested-entity leakage, and why it's invisible.** The compound-key matcher indexes any reachable `(type, field)` pair regardless of nesting depth or whether that type is a tool's actual subject. So `TRK_CREATE_BOARD` — nominally about boards — silently becomes a "certain" producer of `issue_id` *and* `user_id` for over a dozen unrelated consumers, purely because `Issue`/`User` happen to be reachable four levels down in its response schema. Worse: since the matched type name is a single word (`Issue`, `User`), it's tagged **high-confidence** — the exact tier `generateDetailed()` treats as unambiguous enough to skip LLM review entirely. This produced 86 of the run's false positives, and the LLM refinement layer had zero opportunity to catch any of them, because they never reach it. The proof this is a confidence-tagging gap rather than an unfixable one: the identical leakage pattern also happened via `parent_issue_id` (self-referential, matched via the bare-identifier path, tagged **low**-confidence) — and there, LLM validation caught it correctly, rejecting `TRK_CREATE_BOARD → LINK_SUBTASK [parent_issue_id]` with *"Board creation doesn't yield an Issue id."* Same underlying bug, two confidence paths, only one has a safety net.
+
+**2. Fill-gap hallucination on generic caller-authored fields.** For `TRK_CREATE_BOARD`'s `name` param (a brand-new name the caller is inventing), the fill-gap step proposed **37 of the 57 tools in the catalog** as valid producers — anything with any `name`-shaped output field. Its own returned reasoning: *"it's more likely that the board name is user-provided... [but] since 'name' is a common field, they are plausible producers."* The model identified the correct answer, then overrode itself — the prompt's "list every plausible producer, don't stop at one" instruction beat the create-vs-lookup guidance once a generic field name (`name`/`title`/`url`/`emoji`) turned out to be shared across dozens of entities. This is the same bug class as the `tag_name` fix earlier in this README, and proves that fix was narrower than it looked — it closed one specific instance, not the general pattern.
+
+Both are open, not yet fixed: (1) needs confidence tagging to account for nesting depth/directness, not just whether a type name is one word; (2) needs the fill-gap prompt's exhaustiveness instruction to stop overriding its own create-vs-lookup judgment when a field name is common across many entities.
+
 ## How the matching logic actually performs
 
 `npm run metrics -- catalogs/<name>.json` classifies every required input in a catalog into one of three buckets, instead of just reporting a raw edge count:
