@@ -246,7 +246,6 @@ export function generateDetailed(tools: Tool[]): DetailedGraph {
 
     for (const inputName of requiredInputNames(tool)) {
       const key = inputName.toLowerCase();
-      if ((requiredByCount.get(key) ?? 0) > ambientCutoff) continue;
       if (isEnumConstrained(tool, inputName)) continue;
 
       // A single-word type name is unambiguous (the whole type IS the
@@ -267,6 +266,29 @@ export function generateDetailed(tools: Tool[]): DetailedGraph {
           producers.set(p.slug, { field: p, confidence: "low" });
         }
       }
+
+      // "Frequent" alone doesn't mean "the caller already has it" -- it also
+      // describes a central entity's id needed by many tools (e.g.
+      // customer_id at 31.7% of a payments catalog), which is a real
+      // dependency, not context. The two only look the same by frequency. The
+      // actual tell is whether anything in the catalog *produces* a matching
+      // field at all: owner/repo (genuine ambient context) have zero
+      // producers anywhere in a GitHub-shaped catalog, while customer_id does
+      // (Customer.id, via an exact "customer_id" compound-key match). Only
+      // suppress when both signals agree.
+      //
+      // This check deliberately looks at compoundIndex alone, not the full
+      // `producers` map built below -- a *bare*-identifier match (context-word
+      // overlap with the consumer param's own name, e.g. Channel.id
+      // overlapping with a param literally named "channel") is exactly the
+      // same loose heuristic that legitimately resolves User.id -> "user", so
+      // it can't also be trusted to override the ambient signal for a param
+      // like Slack's "channel" -- required by nearly every tool as pure
+      // context, yet coincidentally bare-matchable. A compound match requires
+      // the consumer param to literally spell out `${type}_${field}` (e.g.
+      // "customer_id"), which "channel" structurally can't satisfy.
+      const hasCompoundProducer = (compoundIndex.get(key) ?? []).length > 0;
+      if ((requiredByCount.get(key) ?? 0) > ambientCutoff && !hasCompoundProducer) continue;
 
       if (producers.size === 0) {
         unmatched.push({ tool: consumerSlug, param: inputName });
